@@ -1,0 +1,4041 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>帝国運用カードゲーム ECG v2.20</title>
+<style>
+/* ═══ ECG Phase③ — osakenpiro正典 (colors_and_type.css準拠 void+stars+金箔) ═══ */
+:root{
+  --void:#0a0a0f; --void-deep:#06060a; --surface:#15141a; --surface-hi:#1c1a23;
+  --gold:#d4a853; --gold-soft:rgba(212,168,83,.12); --gold-glow:rgba(212,168,83,.25); --gold-edge:rgba(212,168,83,.45);
+  --parchment:#c8b8a0; --violet:#a78bfa; --debris-1:#6b6b80; --debris-2:#3a3530; --rust:#b08a8a;
+  --fg-1:#e8e0d0; --fg-2:#b8b0a0; --fg-3:#807868; --dim:#5a5448;
+  --line:rgba(200,184,160,.10); --line-hover:rgba(212,168,83,.20); --line-strong:rgba(212,168,83,.45);
+  --sec-agr:#a8b08a; --sec-ind:#8a9aa8; --sec-mil:#b08a8a; --sec-pol:#a78bfa; --sec-hero:#d4a853;
+  --serif:"Cormorant Garamond","Times New Roman","游明朝体","Yu Mincho",YuMincho,"Hiragino Mincho ProN",serif;
+}
+*{box-sizing:border-box; margin:0; padding:0; scrollbar-width:thin; scrollbar-color:var(--debris-1) var(--void);}
+body{background:radial-gradient(1100px 700px at 50% -8%, #100f17 0%, var(--void) 52%, var(--void-deep) 100%) fixed;
+  color:var(--fg-1); font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic Medium","Yu Gothic",system-ui,sans-serif;
+  font-size:13px; line-height:1.55; -webkit-font-smoothing:antialiased;}
+body::before{content:''; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+  background-image:
+    radial-gradient(1px 1px at 11% 19%, rgba(232,224,208,.7) 50%, transparent 51%),
+    radial-gradient(1px 1px at 67% 9%,  rgba(232,224,208,.5) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 84% 31%, rgba(212,168,83,.55) 50%, transparent 51%),
+    radial-gradient(1px 1px at 39% 44%, rgba(232,224,208,.4) 50%, transparent 51%),
+    radial-gradient(1px 1px at 92% 67%, rgba(232,224,208,.55) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 22% 78%, rgba(212,168,83,.4) 50%, transparent 51%),
+    radial-gradient(1px 1px at 54% 89%, rgba(232,224,208,.45) 50%, transparent 51%);
+  background-size:820px 640px; background-repeat:repeat;}
+#app{min-height:100vh; position:relative; z-index:1;}
+button{font-family:inherit;}
+select{font-family:inherit;}
+
+/* ── タイトル ── */
+.title-screen{min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:13px; padding:24px;}
+.title-cap{font-family:var(--serif); font-style:italic; font-size:12px; letter-spacing:.34em; color:var(--gold); opacity:.8;}
+.title-screen h1{font-family:var(--serif); font-weight:400; font-size:35px; color:var(--gold); letter-spacing:.08em;
+  text-shadow:0 0 30px var(--gold-glow); line-height:1.15; text-align:center;}
+.title-screen .sub{color:var(--fg-3); font-size:12px; letter-spacing:.14em;}
+.myth{max-width:540px; text-align:center; padding:13px 20px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); margin:2px 0 4px;}
+.myth-q{font-family:var(--serif); font-size:15px; color:var(--fg-1); line-height:1.85;}
+.myth-s{font-size:11px; color:var(--fg-3); margin-top:6px; line-height:1.7;}
+.myth-src{font-size:9px; color:var(--dim); letter-spacing:.28em; margin-top:8px;}
+.fac-row{display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:center;}
+.fac-label{width:86px; text-align:right; color:var(--fg-2); font-weight:bold; font-size:12px;}
+.fac-btn{padding:8px 15px; border-radius:8px; background:var(--surface); border:1px solid var(--line); color:var(--fg-3); cursor:pointer; font-size:13px; font-weight:bold; transition:all .15s;}
+.fac-btn:hover{border-color:var(--line-hover); color:var(--fg-2);}
+.fac-btn.sel{border-color:var(--gold-edge); color:var(--gold); background:var(--gold-soft);}
+.deck-sel{background:var(--surface); color:var(--fg-2); border:1px solid var(--line); border-radius:7px; padding:7px 9px; font-size:12px; max-width:230px; cursor:pointer;}
+.deck-sel:hover{border-color:var(--line-hover);}
+.title-btns{display:flex; gap:10px; margin-top:8px; align-items:center;}
+.note{color:var(--dim); font-size:11px; text-align:center; line-height:1.8;}
+
+/* ── 共通ボタン ── */
+.big-btn{white-space:nowrap; padding:11px 26px; border-radius:9px; border:1px solid transparent; background:var(--gold); color:#0a0a0f; font-weight:600; font-size:14px; cursor:pointer; width:100%; letter-spacing:.04em; transition:all .15s;}
+.big-btn:hover{filter:brightness(1.08); box-shadow:0 0 14px var(--gold-glow);}
+.big-btn.ghost{background:transparent; border:1px solid var(--gold-edge); color:var(--gold);}
+.big-btn.ghost:hover{background:var(--gold-soft);}
+.big-btn.warn{background:var(--surface-hi); border:1px solid var(--line-strong); color:var(--gold);}
+.mini-btn{padding:4px 10px; border-radius:5px; background:var(--surface-hi); border:1px solid var(--line); color:var(--fg-2); cursor:pointer; font-size:11px; transition:all .12s;}
+.mini-btn:hover{border-color:var(--line-hover);}
+.mini-btn.go{color:var(--gold); border-color:var(--gold-edge);}
+.mini-btn.go.off{opacity:.4; cursor:default;}
+.mini-btn.blind{width:100%; margin-top:4px; color:var(--parchment); border-color:var(--line-hover);}
+.mini-btn:disabled{opacity:.35; cursor:default;}
+
+/* ── ゲームレイアウト ── */
+.game{display:grid; grid-template-columns:1fr 290px; min-height:100vh;}
+.main-area{padding:8px; overflow:auto;}
+.sidebar{border-left:1px solid var(--line); background:rgba(21,20,26,.72); display:flex; flex-direction:column; gap:8px; padding:8px; max-height:100vh; overflow:auto;}
+
+.resbar{display:flex; gap:10px; align-items:center; padding:6px 10px; background:var(--surface); border:1px solid var(--line); border-radius:8px; font-size:12px; flex-wrap:wrap;}
+.resbar.mine{border-color:var(--gold-edge);}
+.resbar .hp{color:var(--rust); font-weight:bold;}
+.resbar small{color:var(--dim);}
+.resbar .counts{margin-left:auto; color:var(--dim); font-size:11px;}
+
+.board{display:grid; grid-template-columns:repeat(5,1fr); gap:5px; margin:6px 0;}
+.board.opp{opacity:.85;}
+.sec-col{border:1px solid var(--line); border-radius:8px; padding:4px; min-height:64px; background:rgba(6,6,10,.45);}
+.sec-col.active-sec{border-color:var(--gold-edge); background:var(--gold-soft);}
+.sec-head{font-size:11px; font-weight:bold; margin-bottom:3px;}
+.sec-head small{color:var(--dim); font-weight:normal;}
+.act-dot{color:var(--gold); animation:blink 1.2s infinite;}
+@keyframes blink{50%{opacity:.2;}}
+.divider{height:1px; background:linear-gradient(90deg, transparent, var(--gold-edge), transparent); margin:9px 0; opacity:.6;}
+.empty{color:var(--debris-2); font-size:11px; padding:8px 4px;}
+
+/* ── カード ── */
+.card{background:linear-gradient(168deg, var(--surface-hi), var(--surface)); border:1px solid var(--line); border-left:3px solid var(--debris-1); border-radius:7px; padding:4px 6px; margin:3px 0; cursor:default; position:relative; font-size:11px; transition:all .12s;}
+.card.sec-HERO{background:linear-gradient(168deg, #1e1913, var(--surface));}
+.card.actable{cursor:pointer; border-color:var(--line-hover); box-shadow:0 0 8px var(--gold-glow);}
+.card.actable:hover{transform:translateY(-2px); box-shadow:0 2px 12px var(--gold-glow);}
+.card.target{cursor:pointer; border-color:var(--gold); box-shadow:0 0 12px var(--gold-glow); background:linear-gradient(168deg, #221d12, var(--surface));}
+.card.sleep{opacity:.5; filter:grayscale(.55);}
+.card.dim{opacity:.35;}
+.chead{display:flex; justify-content:space-between; font-size:9px;}
+.chead .sec{font-weight:bold; letter-spacing:.06em;}
+.zzz{font-size:12px;}
+.used{color:var(--parchment); font-weight:bold;}
+.cname{font-weight:bold; font-size:12px; margin:1px 0; color:var(--fg-1);}
+.cinfo{display:flex; gap:6px; font-size:10px; color:var(--fg-2);}
+.cinfo .gar{color:var(--sec-ind);}
+.cinfo .tok{color:var(--gold);}
+.cinfo .armor{color:var(--sec-ind);}
+.ceff{font-size:9px; color:var(--fg-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:140px;}
+.cost{font-size:10px; color:var(--fg-2); margin-top:2px;}
+.hand-row{display:flex; gap:6px; flex-wrap:wrap; padding:4px 0 14px;}
+.hand-row .card{min-width:108px; max-width:130px;}
+.hand-label{font-size:10px; color:var(--dim); margin-top:6px; letter-spacing:.18em;}
+
+/* ── サイドバー部品 ── */
+.phase-box{padding:7px 10px; background:var(--surface); border:1px solid var(--line); border-radius:8px; font-size:12px;}
+.phase-box b{color:var(--gold);}
+.cpu-think{padding:10px; text-align:center; color:var(--parchment); font-weight:bold; font-style:italic;}
+.atkdef{padding:6px 10px; background:var(--surface); border:1px solid var(--line); border-radius:8px; font-size:12px;}
+.pending-box{padding:8px 10px; background:var(--gold-soft); border:1px solid var(--gold-edge); border-radius:8px; font-size:12px; color:var(--gold);}
+.pending-box .mini-btn{margin-top:5px;}
+.actmenu-box{padding:8px 10px; background:var(--surface-hi); border:1px solid var(--line-strong); border-radius:8px;}
+.act-row{margin:4px 0; display:flex; gap:6px; align-items:center; flex-wrap:wrap;}
+.boost{color:var(--gold); font-size:11px; display:flex; gap:4px; align-items:center;}
+.supply{padding:8px 10px; background:var(--surface); border:1px solid var(--line); border-radius:8px;}
+.sup-head{font-size:12px; font-weight:bold; color:var(--parchment); margin-bottom:5px;}
+.sup-head .ok{color:var(--gold);}
+.sup-row{display:flex; gap:6px; align-items:center; padding:4px 2px; border-bottom:1px dashed var(--line); font-size:11px;}
+.sup-row .mini-btn{margin-left:auto;}
+.log{flex:1; min-height:140px; overflow:auto; background:rgba(6,6,10,.55); border:1px solid var(--line); border-radius:8px; padding:6px 8px; font-size:10px; color:var(--fg-3); line-height:1.6;}
+.log .turn{color:var(--parchment); font-weight:bold;}
+.log .win{color:var(--gold); font-weight:bold;}
+.log .err{color:var(--rust);}
+.foot-btns{display:flex; gap:6px;}
+
+/* ── モーダル/オーバーレイ ── */
+.overlay{position:fixed; inset:0; z-index:1000; background:rgba(6,6,10,.82); display:flex; align-items:center; justify-content:center;}
+.modal{background:var(--surface); border:1px solid var(--line-strong); border-radius:12px; padding:22px; max-width:560px; text-align:center; box-shadow:0 8px 40px rgba(0,0,0,.6);}
+.modal h3{margin-bottom:10px; color:var(--fg-1); font-weight:600;}
+.modal-cards{display:flex; gap:8px; justify-content:center; margin:10px 0; flex-wrap:wrap;}
+.modal-cards .card{min-width:120px;}
+.win-modal .trophy{font-size:50px;}
+.win-modal h2{font-family:var(--serif); color:var(--gold); margin:8px 0; font-weight:400; letter-spacing:.06em;}
+.win-modal p{color:var(--fg-2); margin-bottom:14px;}
+
+/* ── ツールチップ ── */
+.tooltip{position:fixed; top:10px; left:10px; z-index:2000; background:var(--surface-hi); border:1px solid var(--line-hover); border-radius:10px; padding:12px; max-width:270px; font-size:11px; box-shadow:0 4px 24px rgba(0,0,0,.65); pointer-events:none;}
+.tt-name{font-weight:bold; font-size:14px;}
+.tt-meta{color:var(--dim); font-size:9px; margin-bottom:5px;}
+.tt-cost{color:var(--fg-2); margin:3px 0;}
+.tt-eff{margin:3px 0; padding-left:7px; border-left:2px solid var(--debris-1); color:var(--fg-2);}
+.tt-eff.tt-scale-on{border-left-color:var(--gold); color:var(--gold);}
+.tt-eff.tt-scale-off{opacity:.45;}
+
+/* ── デッキビルダー ── */
+.bld{min-height:100vh; max-width:1100px; margin:0 auto; padding:22px 16px;}
+.bld-head{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:8px;}
+.bld-head h2{font-family:var(--serif); font-weight:400; color:var(--gold); letter-spacing:.07em; font-size:22px; margin-right:auto;}
+.bld-name{background:var(--surface); border:1px solid var(--line); color:var(--fg-1); padding:7px 10px; border-radius:7px; font-size:13px; min-width:170px;}
+.bld-name:focus{outline:none; border-color:var(--gold-edge);}
+.bld-tabs{display:flex; gap:6px; margin:12px 0 0;}
+.bld-tab{padding:8px 18px; background:var(--surface); border:1px solid var(--line); border-bottom:none; border-radius:9px 9px 0 0; color:var(--fg-3); cursor:pointer; font-size:12px; font-weight:bold;}
+.bld-tab.on{color:var(--gold); border-color:var(--line-strong); background:var(--surface-hi);}
+.bld-valid{display:flex; flex-wrap:wrap; gap:6px; padding:10px; background:var(--surface-hi); border:1px solid var(--line-strong); border-radius:0 9px 9px 9px; margin-bottom:10px;}
+.chip{font-size:11px; padding:3px 11px; border-radius:999px; border:1px solid var(--line); color:var(--fg-3);}
+.chip.ok{color:var(--gold); border-color:var(--gold-edge); background:var(--gold-soft);}
+.chip.ng{color:var(--rust); border-color:rgba(176,138,138,.55);}
+.bld-pool{display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); gap:6px;}
+.b-row{display:flex; align-items:center; gap:7px; padding:6px 9px; background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--debris-1); border-radius:7px; font-size:12px;}
+.b-row:hover{border-color:var(--line-hover);}
+.b-row.zero{opacity:.6;}
+.b-sec{font-size:10px; font-weight:bold; width:30px; letter-spacing:.04em;}
+.b-name{font-weight:bold; color:var(--fg-1); white-space:nowrap;}
+.b-hint{color:var(--fg-3); font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;}
+.b-cost{font-size:10px; color:var(--fg-2); white-space:nowrap;}
+.b-step{display:flex; align-items:center; gap:5px; margin-left:auto;}
+.b-step .mini-btn{padding:2px 8px;}
+.b-cnt{min-width:18px; text-align:center; font-weight:bold; color:var(--fg-3);}
+.b-cnt.has{color:var(--gold);}
+.bld-foot{display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; align-items:center;}
+.bld-foot .big-btn{width:auto; padding:10px 22px;}
+.bld-decks{margin-top:18px; border-top:1px solid var(--line); padding-top:10px;}
+.bld-decks h3{font-size:12px; color:var(--fg-3); letter-spacing:.18em; margin-bottom:6px;}
+.bld-deck-row{display:flex; gap:8px; align-items:center; padding:5px 0; color:var(--fg-2); font-size:12px;}
+
+@media (max-width:900px){
+  .game{grid-template-columns:1fr;}
+  .sidebar{max-height:none; border-left:none; border-top:1px solid var(--line);}
+  .bld-pool{grid-template-columns:1fr;}
+  .title-screen h1{font-size:27px;}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script id="cards-data" type="application/json">
+{
+  "meta": {
+    "game": "帝国運用カードゲーム (Empire Card Game / ECG)",
+    "version": "2.20",
+    "cardCount": 74,
+    "source": "workspace/game-projects-archive/cardgame-empire-v2.jsx (v2.0実装, 2026-04-29) — 静的フィールド機械抽出 + op語彙手動マップ",
+    "v220Authority": "Notion 3532b7e5-43e0-8125-a846-ef8e0e7b1451 (v2.20正式仕様書到達ページ)。原典SLP_egc-r2.txtは喪失、v2.20差分(杭柵)はJSX時点で適用済を確認",
+    "generatedAt": "2026-06-06",
+    "sessionId": "SES-419",
+    "phase": "Phase① カードデータJSON化"
+  },
+  "constants": {
+    "sections": [
+      "AGR",
+      "IND",
+      "MIL",
+      "POL",
+      "HERO"
+    ],
+    "secNames": {
+      "AGR": "農業",
+      "IND": "工業",
+      "MIL": "軍事",
+      "POL": "政治",
+      "HERO": "英雄"
+    },
+    "secColors": {
+      "AGR": "#4caf50",
+      "IND": "#8d6e63",
+      "MIL": "#e53935",
+      "POL": "#42a5f5",
+      "HERO": "#ab47bc"
+    },
+    "resources": [
+      "food",
+      "prod",
+      "civ",
+      "fame"
+    ],
+    "resNames": {
+      "food": "食料(F)",
+      "prod": "製品(P)",
+      "civ": "民度(C)",
+      "fame": "人気(H)"
+    },
+    "resIcons": {
+      "food": "🌾",
+      "prod": "⚒️",
+      "civ": "📜",
+      "fame": "⭐"
+    },
+    "tagColors": {
+      "Basic": "#888",
+      "Viking": "#ff9f43",
+      "Knight": "#54a0ff",
+      "Samurai": "#ff6b6b",
+      "Token": "#aaa"
+    },
+    "cityHP": 10,
+    "handSize": 5,
+    "baseCaps": {
+      "food": 5,
+      "prod": 5,
+      "civ": 5,
+      "fame": 99
+    },
+    "wakeLimit": {
+      "HERO": 1,
+      "default": 3
+    },
+    "startResources": {
+      "food": 2,
+      "prod": 2,
+      "civ": 0,
+      "fame": 0
+    }
+  },
+  "rules": {
+    "turnPhases": [
+      "Start",
+      "Main",
+      "Action",
+      "End",
+      "Buy"
+    ],
+    "start": "手札5枚まで補充(捨て札リシャッフル)→ターン値リセット→兵站(F支払, logisticsReduceで軽減, 払えなければSleep)→Start効果",
+    "main": "手札プレイ。セクション押し出し: wake上限超過時は最古wake→Sleep",
+    "action": "1セクション選択、wakeカードを起動(actionUsed管理)",
+    "end": "①生産(wakeのPas効果+倍率) ②戦闘(自turnATK vs 敵DEF) ③循環(Sleep→捨て札, expendable→追放) ④資源clamp",
+    "buy": "自サプライから1枚/ターン(表3枚 or ブラインド)→捨て札へ",
+    "burst": "資源上限clampはEndフェーズのみ=ターン中の一時突破(Burst)可【v2.20ルール、実装済】",
+    "battle": "敵DEF = wakeカードのunit.def合計 + 敵turnDEFBonus + sleepカードのgarrison合計。超過分が都市HPダメージ",
+    "victory": "敵都市HP=0(初期10)"
+  },
+  "deckRules": {
+    "startingDeck": {
+      "size": 10,
+      "composition": "AGR5枚+IND5枚",
+      "pool": "Basic+自勢力のAGR/INDのみ",
+      "mustInclude": {
+        "BSC_FARM": ">=1",
+        "BSC_WORKSHOP": ">=1"
+      }
+    },
+    "supplyDeck": {
+      "size": 20,
+      "pool": "Basic+自勢力の全セクション"
+    },
+    "sameNameLimit": 2,
+    "tokenExcluded": true
+  },
+  "defaultDecks": {
+    "starting": {
+      "BSC_FARM": 2,
+      "BSC_SILO": 2,
+      "BSC_STR_JAR": 1,
+      "BSC_WORKSHOP": 2,
+      "BSC_YARD": 2,
+      "BSC_STR_RACK": 1
+    },
+    "supply": {
+      "BSC_FARM": 1,
+      "BSC_WORKSHOP": 1,
+      "BSC_SILO": 1,
+      "BSC_YARD": 1,
+      "BSC_PALISADE": 2,
+      "BSC_INFANTRY": 2,
+      "BSC_CAVALRY": 1,
+      "BSC_DIET": 2,
+      "BSC_INTIMIDATE": 1,
+      "BSC_CONVENE": 1,
+      "BSC_REQUISITION": 1,
+      "BSC_STR_GRANARY": 1,
+      "BSC_STR_ARMORY": 1,
+      "BSC_STR_CIVCODE": 1,
+      "BSC_MOAT": 1,
+      "BSC_SPEECH": 1,
+      "BSC_MANIFESTO": 1
+    }
+  },
+  "v220Patch": {
+    "BSC_PALISADE": "警備→通常Unit(0/2)・Sleep時防御効果なし(本データ適用済: unit{0,2}/effects空/garrisonなし)"
+  },
+  "cards": [
+    {
+      "id": "BSC_FARM",
+      "name": "農地",
+      "section": "AGR",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {},
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "F+1",
+          "op": "res",
+          "params": {
+            "delta": {
+              "food": 1
+            }
+          }
+        },
+        {
+          "trigger": "Act",
+          "text": "増産:F+1",
+          "cost": {},
+          "op": "res",
+          "params": {
+            "delta": {
+              "food": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_WORKSHOP",
+      "name": "工房",
+      "section": "IND",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {},
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "P+1",
+          "op": "res",
+          "params": {
+            "delta": {
+              "prod": 1
+            }
+          }
+        },
+        {
+          "trigger": "Act",
+          "text": "増産:P+1",
+          "cost": {},
+          "op": "res",
+          "params": {
+            "delta": {
+              "prod": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_DIET",
+      "name": "国会",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "food": 1,
+        "prod": 1
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "C+1",
+          "op": "res",
+          "params": {
+            "delta": {
+              "civ": 1
+            }
+          }
+        },
+        {
+          "trigger": "Act",
+          "text": "増産:C+1",
+          "cost": {},
+          "op": "res",
+          "params": {
+            "delta": {
+              "civ": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_ACTIVITY",
+      "name": "活動",
+      "section": "HERO",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "civ": 2
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "H+1",
+          "op": "res",
+          "params": {
+            "delta": {
+              "fame": 1
+            }
+          }
+        },
+        {
+          "trigger": "Act",
+          "text": "増産:H+1",
+          "cost": {
+            "civ": 2
+          },
+          "op": "res",
+          "params": {
+            "delta": {
+              "fame": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_SILO",
+      "name": "穀物サイロ",
+      "section": "AGR",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "prod": 1
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "蓄積+1",
+          "op": "tokenAdd",
+          "params": {
+            "n": 1
+          }
+        },
+        {
+          "trigger": "Act",
+          "text": "放出:トークン→F",
+          "cost": {},
+          "op": "tokenRelease",
+          "params": {
+            "to": "food"
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_YARD",
+      "name": "資材置き場",
+      "section": "IND",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "prod": 1
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "蓄積+1",
+          "op": "tokenAdd",
+          "params": {
+            "n": 1
+          }
+        },
+        {
+          "trigger": "Act",
+          "text": "放出:トークン→P",
+          "cost": {},
+          "op": "tokenRelease",
+          "params": {
+            "to": "prod"
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_MANIFESTO",
+      "name": "マニフェスト",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "prod": 1
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "蓄積+1",
+          "op": "tokenAdd",
+          "params": {
+            "n": 1
+          }
+        },
+        {
+          "trigger": "Act",
+          "text": "公約:トークン→C",
+          "cost": {},
+          "op": "tokenRelease",
+          "params": {
+            "to": "civ"
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_SPEECH",
+      "name": "スピーチ",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "civ": 1
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "蓄積+1",
+          "op": "tokenAdd",
+          "params": {
+            "n": 1
+          }
+        },
+        {
+          "trigger": "Act",
+          "text": "演説:C-トークン数→H",
+          "cost": {},
+          "op": "speechTokens",
+          "params": {
+            "spendRes": "civ",
+            "gainRes": "fame"
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_STR_JAR",
+      "name": "貯蔵壺",
+      "section": "AGR",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "prod": 1,
+        "food": 1
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "F上限+2",
+          "capMod": {
+            "food": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_STR_GRANARY",
+      "name": "食糧庫",
+      "section": "AGR",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "prod": 2
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "F上限+4",
+          "capMod": {
+            "food": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_STR_WAREHOUSE",
+      "name": "高床倉庫",
+      "section": "AGR",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "prod": 3,
+        "food": 2
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "F上限+5 / 堅固",
+          "capMod": {
+            "food": 5
+          },
+          "keywords": [
+            "robust"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "BSC_STR_RACK",
+      "name": "武器置き場",
+      "section": "IND",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "prod": 1
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "P上限+2",
+          "capMod": {
+            "prod": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_STR_ARMORY",
+      "name": "兵器蔵",
+      "section": "IND",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "prod": 2
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "P上限+4",
+          "capMod": {
+            "prod": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_STR_CAMP",
+      "name": "野営地",
+      "section": "MIL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "prod": 4,
+        "food": 1
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "P上限+5",
+          "capMod": {
+            "prod": 5
+          }
+        },
+        {
+          "trigger": "Act",
+          "text": "設営:ATK+1",
+          "cost": {},
+          "op": "atk",
+          "params": {
+            "n": 1,
+            "plusUnitAtk": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_STR_CIVCODE",
+      "name": "民法",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "food": 2
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "C上限+2",
+          "capMod": {
+            "civ": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_STR_COURT",
+      "name": "裁判所",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "prod": 1,
+        "food": 2
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "C上限+4",
+          "capMod": {
+            "civ": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_STR_SECSTATE",
+      "name": "国務長官",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "prod": 2,
+        "food": 2
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "C上限+5",
+          "capMod": {
+            "civ": 5
+          }
+        },
+        {
+          "trigger": "Act",
+          "text": "国務:F+1,P+1",
+          "cost": {},
+          "op": "res",
+          "params": {
+            "delta": {
+              "food": 1,
+              "prod": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_PALISADE",
+      "name": "杭柵",
+      "section": "IND",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "prod": 1
+      },
+      "unit": {
+        "atk": 0,
+        "def": 2
+      },
+      "effects": []
+    },
+    {
+      "id": "BSC_MOAT",
+      "name": "堀",
+      "section": "IND",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "prod": 1,
+        "food": 2
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "警備+3",
+          "garrison": 3
+        }
+      ]
+    },
+    {
+      "id": "BSC_WALL",
+      "name": "城壁",
+      "section": "IND",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "prod": 4,
+        "food": 1
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "警備+6",
+          "garrison": 6
+        }
+      ]
+    },
+    {
+      "id": "BSC_INFANTRY",
+      "name": "歩兵",
+      "section": "MIL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "food": 1,
+        "prod": 1
+      },
+      "unit": {
+        "atk": 1,
+        "def": 2
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "攻撃:ATK+1",
+          "cost": {
+            "food": 1
+          },
+          "op": "atk",
+          "params": {
+            "n": 1,
+            "plusUnitAtk": true
+          }
+        },
+        {
+          "trigger": "Pas",
+          "text": "Sleep時追放",
+          "keywords": [
+            "expendable"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "BSC_CAVALRY",
+      "name": "騎兵",
+      "section": "MIL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "food": 2,
+        "prod": 2
+      },
+      "unit": {
+        "atk": 3,
+        "def": 1
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "突撃:ATK+2(計5)",
+          "cost": {
+            "food": 1
+          },
+          "op": "atk",
+          "params": {
+            "n": 2,
+            "plusUnitAtk": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_INTIMIDATE",
+      "name": "威圧",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "civ": 1
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "DEF2以下敵→Sleep",
+          "cost": {
+            "civ": 1
+          },
+          "needsTarget": "enemyWakeDef2",
+          "op": "sleepTarget"
+        }
+      ]
+    },
+    {
+      "id": "BSC_CONVENE",
+      "name": "議会招集",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "civ": 2
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "味方Sleep→Wake",
+          "cost": {
+            "civ": 1
+          },
+          "needsTarget": "allySleep",
+          "op": "wakeTarget"
+        }
+      ]
+    },
+    {
+      "id": "BSC_EMERGENCY",
+      "name": "非常事態宣言",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "civ": 4
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "味方全Sleep→Wake",
+          "cost": {
+            "civ": 3
+          },
+          "op": "wakeAllAllies"
+        }
+      ]
+    },
+    {
+      "id": "BSC_PURGE",
+      "name": "粛清",
+      "section": "POL",
+      "type": "Operation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "civ": 2
+      },
+      "effects": [
+        {
+          "trigger": "Play",
+          "text": "敵Sleep1枚→追放",
+          "needsTarget": "enemySleep",
+          "op": "exileTarget"
+        }
+      ]
+    },
+    {
+      "id": "BSC_ASSASSINATE",
+      "name": "暗殺",
+      "section": "POL",
+      "type": "Operation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "civ": 2,
+        "food": 1
+      },
+      "effects": [
+        {
+          "trigger": "Play",
+          "text": "DEF1以下敵→追放",
+          "needsTarget": "enemyDef1",
+          "op": "exileTarget"
+        }
+      ]
+    },
+    {
+      "id": "BSC_WARTIME_REGIME",
+      "name": "戦時体制令",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "civ": 4
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "AGR枠0,MIL枠+3",
+          "cost": {
+            "civ": 3
+          },
+          "op": "slotMod",
+          "params": {
+            "mod": {
+              "AGR": -3,
+              "MIL": 3
+            },
+            "sleepExcess": "AGR"
+          }
+        }
+      ]
+    },
+    {
+      "id": "BSC_REQUISITION",
+      "name": "徴発令",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "civ": 1,
+        "prod": 1
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "徴発:F+2",
+          "cost": {},
+          "op": "res",
+          "params": {
+            "delta": {
+              "food": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "POL_BUMPER",
+      "name": "豊作政策",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "civ": 2
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "F生産x2",
+          "cost": {
+            "civ": 2
+          },
+          "op": "prodMul",
+          "params": {
+            "res": "food",
+            "mul": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "POL_MOBILIZE",
+      "name": "国家動員法",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "civ": 2
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "P生産x2",
+          "cost": {
+            "civ": 2
+          },
+          "op": "prodMul",
+          "params": {
+            "res": "prod",
+            "mul": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "POL_WARTIME",
+      "name": "戦時動員令",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "civ": 2
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "自AGR→Sleep,MIL→Wake",
+          "cost": {
+            "civ": 1
+          },
+          "needsTarget": "allyAgrWake",
+          "op": "wartimeSwap",
+          "params": {
+            "thenWakeTarget": "allySleepMil"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MIL_SIEGE",
+      "name": "攻城槌",
+      "section": "MIL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "prod": 2,
+        "food": 1
+      },
+      "unit": {
+        "atk": 2,
+        "def": 3
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "攻城:敵ユニットに2点",
+          "cost": {
+            "food": 2,
+            "prod": 1
+          },
+          "needsTarget": "enemyUnit",
+          "op": "siegeDamage",
+          "params": {
+            "n": 2,
+            "pierceToCity": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "MIL_CEASEFIRE",
+      "name": "強制停戦",
+      "section": "MIL",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "prod": 1
+      },
+      "unit": {
+        "atk": 1,
+        "def": 2
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "抑圧:敵Wake→Sleep",
+          "cost": {
+            "food": 1,
+            "civ": 1
+          },
+          "needsTarget": "enemyWake",
+          "op": "sleepTarget"
+        }
+      ]
+    },
+    {
+      "id": "HERO_FLAG",
+      "name": "軍神の旗手",
+      "section": "HERO",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "civ": 4
+      },
+      "effects": [
+        {
+          "trigger": "Scale",
+          "text": "[3-5]初回軍事F-1",
+          "scaleRange": [
+            3,
+            5
+          ]
+        },
+        {
+          "trigger": "Scale",
+          "text": "[6-8]↑+ATK+2",
+          "scaleRange": [
+            6,
+            8
+          ]
+        },
+        {
+          "trigger": "Scale",
+          "text": "[9+]全軍ATK+4(End C-1)",
+          "scaleRange": [
+            9,
+            99
+          ]
+        },
+        {
+          "trigger": "Act",
+          "text": "再起:Wake",
+          "cost": {
+            "fame": 3
+          },
+          "op": "reawaken"
+        }
+      ]
+    },
+    {
+      "id": "HERO_VIZIER",
+      "name": "大宰相",
+      "section": "HERO",
+      "type": "Nation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "civ": 3
+      },
+      "effects": [
+        {
+          "trigger": "Scale",
+          "text": "[3-5]政治ActC-1",
+          "scaleRange": [
+            3,
+            5
+          ]
+        },
+        {
+          "trigger": "Scale",
+          "text": "[6-8]↑+End H+1",
+          "scaleRange": [
+            6,
+            8
+          ]
+        },
+        {
+          "trigger": "Scale",
+          "text": "[9+]Sleep時H+1",
+          "scaleRange": [
+            9,
+            99
+          ]
+        },
+        {
+          "trigger": "Act",
+          "text": "再起:Wake",
+          "cost": {
+            "fame": 2
+          },
+          "op": "reawaken"
+        }
+      ]
+    },
+    {
+      "id": "OP_EMERGENCE",
+      "name": "羽化",
+      "section": "HERO",
+      "type": "Operation",
+      "tags": [
+        "Basic"
+      ],
+      "playCost": {
+        "fame": 1
+      },
+      "effects": [
+        {
+          "trigger": "Play",
+          "text": "手札HERO→Wake配置",
+          "needsTarget": "handHero",
+          "op": "deployFromHand",
+          "params": {
+            "filter": "hero",
+            "state": "wake"
+          }
+        }
+      ]
+    },
+    {
+      "id": "VIK_RAIDER",
+      "name": "海狼の戦士",
+      "section": "MIL",
+      "type": "Nation",
+      "tags": [
+        "Viking"
+      ],
+      "playCost": {
+        "food": 1
+      },
+      "unit": {
+        "atk": 3,
+        "def": 1
+      },
+      "effects": [
+        {
+          "trigger": "Start",
+          "text": "兵站:F-1",
+          "logistics": 1
+        },
+        {
+          "trigger": "Act",
+          "text": "襲撃:ATK+3",
+          "cost": {
+            "food": 1
+          },
+          "op": "atk",
+          "params": {
+            "n": 3,
+            "plusUnitAtk": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "VIK_SCAVENGER",
+      "name": "荒くれ者",
+      "section": "MIL",
+      "type": "Nation",
+      "tags": [
+        "Viking"
+      ],
+      "playCost": {
+        "food": 1
+      },
+      "unit": {
+        "atk": 2,
+        "def": 1
+      },
+      "effects": [
+        {
+          "trigger": "Start",
+          "text": "徴発:C-1→F+1",
+          "op": "spendOrSleep",
+          "params": {
+            "spend": {
+              "civ": 1
+            },
+            "gain": {
+              "food": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "VIK_BERSERK",
+      "name": "狂戦士",
+      "section": "MIL",
+      "type": "Nation",
+      "tags": [
+        "Viking"
+      ],
+      "playCost": {
+        "food": 2
+      },
+      "unit": {
+        "atk": 5,
+        "def": 0
+      },
+      "effects": [
+        {
+          "trigger": "Start",
+          "text": "兵站:F-2",
+          "logistics": 2
+        },
+        {
+          "trigger": "Act",
+          "text": "特攻:HP-1,ATK+5",
+          "cost": {},
+          "op": "atkSelfDamage",
+          "params": {
+            "hp": 1,
+            "n": 5,
+            "plusUnitAtk": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "VIK_LONGSHIP",
+      "name": "ロングシップ",
+      "section": "MIL",
+      "type": "Nation",
+      "tags": [
+        "Viking"
+      ],
+      "playCost": {
+        "prod": 2
+      },
+      "unit": {
+        "atk": 2,
+        "def": 1
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "兵站軽減-1",
+          "logisticsReduce": 1
+        }
+      ]
+    },
+    {
+      "id": "VIK_LOOT",
+      "name": "戦利品置場",
+      "section": "AGR",
+      "type": "Nation",
+      "tags": [
+        "Viking"
+      ],
+      "playCost": {
+        "prod": 1
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "F獲得時+1(1回/T)",
+          "lootBonus": true
+        }
+      ]
+    },
+    {
+      "id": "VIK_DIST",
+      "name": "戦利品の分配",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Viking"
+      ],
+      "playCost": {
+        "prod": 1,
+        "food": 1
+      },
+      "effects": [
+        {
+          "trigger": "Start",
+          "text": "前T都市ダメ→F+1,P+1",
+          "op": "onLastDamageGain",
+          "params": {
+            "delta": {
+              "food": 1,
+              "prod": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "VIK_FEAST",
+      "name": "恐怖の宴",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Viking"
+      ],
+      "playCost": {
+        "food": 2
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "祝杯:兵站免除",
+          "cost": {
+            "civ": 1
+          },
+          "needsTarget": "allyLogistics",
+          "op": "waiveLogistics"
+        }
+      ]
+    },
+    {
+      "id": "VIK_OP_RAID",
+      "name": "沿岸襲撃",
+      "section": "MIL",
+      "type": "Operation",
+      "tags": [
+        "Viking"
+      ],
+      "playCost": {
+        "food": 2
+      },
+      "effects": [
+        {
+          "trigger": "Play",
+          "text": "F+3,P+1",
+          "op": "res",
+          "params": {
+            "delta": {
+              "food": 3,
+              "prod": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "VIK_OP_SCORCH",
+      "name": "焦土作戦",
+      "section": "POL",
+      "type": "Operation",
+      "tags": [
+        "Viking"
+      ],
+      "playCost": {
+        "civ": 2
+      },
+      "effects": [
+        {
+          "trigger": "Play",
+          "text": "敵AGR Wake→Sleep,F+2",
+          "needsTarget": "enemyAgrWake",
+          "op": "sleepTargetAndGain",
+          "params": {
+            "delta": {
+              "food": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "VIK_HERO_LOW",
+      "name": "略奪の始まり",
+      "section": "HERO",
+      "type": "Nation",
+      "tags": [
+        "Viking"
+      ],
+      "playCost": {
+        "food": 1
+      },
+      "effects": [
+        {
+          "trigger": "Start",
+          "text": "H+(F/3)",
+          "op": "fameFromRes",
+          "params": {
+            "res": "food",
+            "div": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "VIK_HERO_HIGH",
+      "name": "赤髭の首領",
+      "section": "HERO",
+      "type": "Nation",
+      "tags": [
+        "Viking"
+      ],
+      "playCost": {
+        "civ": 3
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "兵站全軍ATK+2",
+          "cost": {
+            "food": 1
+          },
+          "op": "atkPerLogisticsAlly",
+          "params": {
+            "n": 2
+          }
+        },
+        {
+          "trigger": "Scale",
+          "text": "[9+]兵站軽減-2",
+          "scaleRange": [
+            9,
+            99
+          ]
+        }
+      ]
+    },
+    {
+      "id": "VIK_HERO_ALT",
+      "name": "血斧の王",
+      "section": "HERO",
+      "type": "Nation",
+      "tags": [
+        "Viking"
+      ],
+      "playCost": {
+        "civ": 4
+      },
+      "effects": [
+        {
+          "trigger": "Scale",
+          "text": "[3-5]Start:HP-1→F+3",
+          "scaleRange": [
+            3,
+            5
+          ]
+        },
+        {
+          "trigger": "Scale",
+          "text": "[6-8]Act:HP-2→敵破壊",
+          "scaleRange": [
+            6,
+            8
+          ]
+        },
+        {
+          "trigger": "Scale",
+          "text": "[9+]常時ATK+5",
+          "scaleRange": [
+            9,
+            99
+          ]
+        }
+      ]
+    },
+    {
+      "id": "KNT_SQUIRE",
+      "name": "従騎士",
+      "section": "MIL",
+      "type": "Nation",
+      "tags": [
+        "Knight"
+      ],
+      "playCost": {
+        "prod": 1,
+        "food": 1
+      },
+      "unit": {
+        "atk": 2,
+        "def": 2
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "訓練:ATK+2",
+          "cost": {
+            "food": 1
+          },
+          "op": "atk",
+          "params": {
+            "n": 2,
+            "plusUnitAtk": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "KNT_GUARD",
+      "name": "城塞守備隊",
+      "section": "MIL",
+      "type": "Nation",
+      "tags": [
+        "Knight"
+      ],
+      "playCost": {
+        "prod": 1,
+        "food": 1
+      },
+      "unit": {
+        "atk": 1,
+        "def": 4
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "警備+1",
+          "garrison": 1
+        },
+        {
+          "trigger": "Act",
+          "text": "盾陣:DEF+3",
+          "cost": {
+            "prod": 1
+          },
+          "op": "defBonus",
+          "params": {
+            "n": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "KNT_HEAVYCAV",
+      "name": "重装騎兵",
+      "section": "MIL",
+      "type": "Nation",
+      "tags": [
+        "Knight"
+      ],
+      "playCost": {
+        "prod": 3,
+        "food": 1
+      },
+      "unit": {
+        "atk": 4,
+        "def": 4
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "突撃:ATK+5(Boost:P)",
+          "cost": {
+            "food": 2
+          },
+          "boost": {
+            "resource": "prod",
+            "perUnit": 1,
+            "max": 3
+          },
+          "op": "atk",
+          "params": {
+            "n": 5,
+            "plusUnitAtk": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "KNT_ELITE",
+      "name": "近衛騎士",
+      "section": "MIL",
+      "type": "Nation",
+      "tags": [
+        "Knight"
+      ],
+      "playCost": {
+        "prod": 2,
+        "food": 1
+      },
+      "unit": {
+        "atk": 2,
+        "def": 3,
+        "armor": 2
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "重装+2",
+          "textOnly": true
+        },
+        {
+          "trigger": "Act",
+          "text": "警護:ATK+2",
+          "cost": {
+            "food": 1
+          },
+          "op": "atk",
+          "params": {
+            "n": 2,
+            "plusUnitAtk": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "KNT_TOWER",
+      "name": "石造りの塔",
+      "section": "IND",
+      "type": "Nation",
+      "tags": [
+        "Knight"
+      ],
+      "playCost": {
+        "prod": 3
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "警備+2 / P上限+5",
+          "garrison": 2,
+          "capMod": {
+            "prod": 5
+          }
+        }
+      ]
+    },
+    {
+      "id": "KNT_SMITHY",
+      "name": "鍛冶場",
+      "section": "IND",
+      "type": "Nation",
+      "tags": [
+        "Knight"
+      ],
+      "playCost": {
+        "prod": 1
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "配給:味方ATK+2/DEF+2",
+          "cost": {
+            "prod": 1
+          },
+          "needsTarget": "allyUnit",
+          "op": "buffUnit",
+          "params": {
+            "atk": 2,
+            "def": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "KNT_CATHEDRAL",
+      "name": "大聖堂",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Knight"
+      ],
+      "playCost": {
+        "prod": 3
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "C+1",
+          "op": "res",
+          "params": {
+            "delta": {
+              "civ": 1
+            }
+          }
+        },
+        {
+          "trigger": "Act",
+          "text": "祝福:HP+1",
+          "cost": {
+            "civ": 2
+          },
+          "op": "heal",
+          "params": {
+            "n": 1,
+            "max": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "KNT_OP_DEPLOY",
+      "name": "緊急配備",
+      "section": "IND",
+      "type": "Operation",
+      "tags": [
+        "Knight"
+      ],
+      "playCost": {
+        "prod": 1
+      },
+      "effects": [
+        {
+          "trigger": "Play",
+          "text": "手札の警備→Wake配置",
+          "needsTarget": "handGarrison",
+          "op": "deployFromHand",
+          "params": {
+            "filter": "garrison",
+            "state": "wake"
+          }
+        }
+      ]
+    },
+    {
+      "id": "KNT_HERO_LOW",
+      "name": "騎士の誓い",
+      "section": "HERO",
+      "type": "Nation",
+      "tags": [
+        "Knight"
+      ],
+      "playCost": {
+        "civ": 1
+      },
+      "effects": [
+        {
+          "trigger": "Start",
+          "text": "H+(P/3)",
+          "op": "fameFromRes",
+          "params": {
+            "res": "prod",
+            "div": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "KNT_HERO_HIGH",
+      "name": "聖騎士団長",
+      "section": "HERO",
+      "type": "Nation",
+      "tags": [
+        "Knight"
+      ],
+      "playCost": {
+        "civ": 5
+      },
+      "unit": {
+        "atk": 0,
+        "def": 5
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "警備+3",
+          "garrison": 3
+        },
+        {
+          "trigger": "Scale",
+          "text": "ATK=H",
+          "textOnly": true
+        },
+        {
+          "trigger": "Act",
+          "text": "聖盾:全DEF+(H/2)",
+          "cost": {},
+          "op": "defBonus",
+          "params": {
+            "formula": "floor(H/2)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "KNT_HERO_ALT",
+      "name": "鉄の姫",
+      "section": "HERO",
+      "type": "Nation",
+      "tags": [
+        "Knight"
+      ],
+      "playCost": {
+        "civ": 3
+      },
+      "effects": [
+        {
+          "trigger": "Scale",
+          "text": "[3-5]Act(P1):HP+1",
+          "scaleRange": [
+            3,
+            5
+          ]
+        },
+        {
+          "trigger": "Scale",
+          "text": "[6-8]Act(P2):城壁Wake",
+          "scaleRange": [
+            6,
+            8
+          ]
+        },
+        {
+          "trigger": "Scale",
+          "text": "[9+]全味方重装+2",
+          "scaleRange": [
+            9,
+            99
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SAM_ASHIGARU",
+      "name": "足軽槍兵",
+      "section": "MIL",
+      "type": "Nation",
+      "tags": [
+        "Samurai"
+      ],
+      "playCost": {
+        "prod": 1,
+        "food": 1
+      },
+      "unit": {
+        "atk": 2,
+        "def": 2
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "槍衾:ATK+2",
+          "cost": {
+            "food": 1
+          },
+          "op": "atk",
+          "params": {
+            "n": 2,
+            "plusUnitAtk": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "SAM_NINJA",
+      "name": "伊賀の忍",
+      "section": "MIL",
+      "type": "Nation",
+      "tags": [
+        "Samurai"
+      ],
+      "playCost": {
+        "civ": 2
+      },
+      "unit": {
+        "atk": 3,
+        "def": 1
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "暗殺:DEF2以下敵追放",
+          "cost": {
+            "civ": 1
+          },
+          "needsTarget": "enemyDef2",
+          "op": "exileTarget"
+        }
+      ]
+    },
+    {
+      "id": "SAM_WARLORD",
+      "name": "侍大将",
+      "section": "MIL",
+      "type": "Nation",
+      "tags": [
+        "Samurai"
+      ],
+      "playCost": {
+        "prod": 2,
+        "food": 1
+      },
+      "unit": {
+        "atk": 4,
+        "def": 3
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "一騎討ち:敵とダメ交換",
+          "cost": {
+            "food": 2
+          },
+          "needsTarget": "enemyWakeUnit",
+          "op": "duel"
+        }
+      ]
+    },
+    {
+      "id": "SAM_CHECKPOINT",
+      "name": "兵糧攻め",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Samurai"
+      ],
+      "playCost": {
+        "prod": 2
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "飢餓+1(敵F+1)",
+          "hunger": 1
+        }
+      ]
+    },
+    {
+      "id": "SAM_FLOODGATE",
+      "name": "水攻め",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Samurai"
+      ],
+      "playCost": {
+        "civ": 3
+      },
+      "effects": [
+        {
+          "trigger": "Pas",
+          "text": "暴動+1(敵POLC+1)",
+          "riot": 1
+        }
+      ]
+    },
+    {
+      "id": "SAM_BEACON",
+      "name": "狼煙台",
+      "section": "AGR",
+      "type": "Nation",
+      "tags": [
+        "Samurai"
+      ],
+      "playCost": {
+        "prod": 1
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "伝令:山3枚→1枚手札",
+          "cost": {
+            "food": 1
+          },
+          "op": "deckPeek",
+          "params": {
+            "look": 3,
+            "take": 1,
+            "shuffleBack": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "SAM_INTIMIDATE",
+      "name": "威圧(侍)",
+      "section": "POL",
+      "type": "Nation",
+      "tags": [
+        "Samurai"
+      ],
+      "playCost": {
+        "civ": 1
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "一喝:DEF2以下敵→Sleep",
+          "cost": {
+            "civ": 1
+          },
+          "needsTarget": "enemyWakeDef2",
+          "op": "sleepTarget"
+        }
+      ]
+    },
+    {
+      "id": "SAM_OP_NIGHT",
+      "name": "夜討ち",
+      "section": "MIL",
+      "type": "Operation",
+      "tags": [
+        "Samurai"
+      ],
+      "playCost": {
+        "civ": 2
+      },
+      "effects": [
+        {
+          "trigger": "Play",
+          "text": "敵Wake→Sleep+2ダメ",
+          "needsTarget": "enemyWake",
+          "op": "sleepAndDamage",
+          "params": {
+            "n": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "SAM_OP_FIRE",
+      "name": "焼き討ち",
+      "section": "MIL",
+      "type": "Operation",
+      "tags": [
+        "Samurai"
+      ],
+      "playCost": {
+        "food": 2
+      },
+      "effects": [
+        {
+          "trigger": "Play",
+          "text": "敵F-3",
+          "op": "res",
+          "params": {
+            "delta": {
+              "food": -3
+            },
+            "target": "enemy",
+            "floor": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "SAM_HERO_LOW",
+      "name": "大名の野望",
+      "section": "HERO",
+      "type": "Nation",
+      "tags": [
+        "Samurai"
+      ],
+      "playCost": {
+        "civ": 1
+      },
+      "effects": [
+        {
+          "trigger": "Start",
+          "text": "H+(C/3)",
+          "op": "fameFromRes",
+          "params": {
+            "res": "civ",
+            "div": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "SAM_HERO_HIGH",
+      "name": "天下人",
+      "section": "HERO",
+      "type": "Nation",
+      "tags": [
+        "Samurai"
+      ],
+      "playCost": {
+        "civ": 6
+      },
+      "effects": [
+        {
+          "trigger": "Scale",
+          "text": "[9+]飢餓+(H)",
+          "scaleRange": [
+            9,
+            99
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SAM_HERO_ALT",
+      "name": "影の支配者",
+      "section": "HERO",
+      "type": "Nation",
+      "tags": [
+        "Samurai"
+      ],
+      "playCost": {
+        "civ": 4
+      },
+      "effects": [
+        {
+          "trigger": "Scale",
+          "text": "[3-5]Act(C1):敵手札捨て",
+          "scaleRange": [
+            3,
+            5
+          ]
+        },
+        {
+          "trigger": "Scale",
+          "text": "[6-8]Act(C2):敵Wake→手札",
+          "scaleRange": [
+            6,
+            8
+          ]
+        },
+        {
+          "trigger": "Scale",
+          "text": "[9+]暴動+2",
+          "scaleRange": [
+            9,
+            99
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TOK_ONENIGHT",
+      "name": "一夜城の計",
+      "section": "IND",
+      "type": "Operation",
+      "tags": [
+        "Samurai"
+      ],
+      "playCost": {
+        "prod": 4,
+        "civ": 1
+      },
+      "effects": [
+        {
+          "trigger": "Play",
+          "text": "一夜城壁トークンを出す",
+          "op": "summonToken",
+          "params": {
+            "cardId": "TOK_WALL",
+            "section": "IND",
+            "state": "wake"
+          }
+        }
+      ]
+    },
+    {
+      "id": "TOK_WALL",
+      "name": "一夜城壁",
+      "section": "IND",
+      "type": "Nation",
+      "tags": [
+        "Token"
+      ],
+      "playCost": {},
+      "unit": {
+        "atk": 0,
+        "def": 6
+      },
+      "effects": [
+        {
+          "trigger": "Act",
+          "text": "補強:DEF+2",
+          "cost": {
+            "prod": 1
+          },
+          "op": "defBonus",
+          "params": {
+            "n": 2
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   ECG Engine — 帝国運用カードゲーム v2.20 コアループ
+   純ロジック・DOM非依存（node/headless実行可）
+   Phase② (SES-425) — 設計判断 #1-#9 適用済（ECG-NOTES.md参照）
+   ═══════════════════════════════════════════════════════════════ */
+'use strict';
+var ECG = (function(){
+
+  var CARDS = {};   // id → カード定義（cards.v220.json）
+  var CONST = null;
+  var DEFAULTS = null;
+  var RULES = null;
+  var SECTIONS = ["AGR","IND","MIL","POL","HERO"];
+
+  function init(data){
+    CONST = data.constants;
+    DEFAULTS = data.defaultDecks;
+    RULES = data.deckRules||null;
+    CARDS = {};
+    for(var i=0;i<data.cards.length;i++) CARDS[data.cards[i].id] = data.cards[i];
+  }
+
+  // ─── 勢力別デフォルトサプライ（判断: 2026-06-06 user裁定。構築UIは③） ───
+  var FACTION_SUPPLY = {
+    Viking: { VIK_RAIDER:2, VIK_SCAVENGER:1, VIK_BERSERK:1, VIK_LONGSHIP:2, VIK_LOOT:1,
+      VIK_DIST:1, VIK_FEAST:1, VIK_OP_RAID:2, VIK_OP_SCORCH:1,
+      VIK_HERO_LOW:1, VIK_HERO_HIGH:1, VIK_HERO_ALT:1,
+      BSC_INFANTRY:1, BSC_PALISADE:1, BSC_DIET:1, BSC_SILO:1, BSC_STR_GRANARY:1 },
+    Knight: { KNT_SQUIRE:2, KNT_GUARD:2, KNT_HEAVYCAV:1, KNT_ELITE:1, KNT_TOWER:1,
+      KNT_SMITHY:1, KNT_CATHEDRAL:1, KNT_OP_DEPLOY:1,
+      KNT_HERO_LOW:1, KNT_HERO_HIGH:1, KNT_HERO_ALT:1,
+      BSC_MOAT:1, BSC_WALL:1, BSC_FARM:1, BSC_DIET:2, BSC_CONVENE:1, BSC_STR_COURT:1 },
+    Samurai: { SAM_ASHIGARU:2, SAM_NINJA:1, SAM_WARLORD:1, SAM_CHECKPOINT:1, SAM_FLOODGATE:1,
+      SAM_BEACON:1, SAM_INTIMIDATE:1, SAM_OP_NIGHT:1, SAM_OP_FIRE:1, TOK_ONENIGHT:1,
+      SAM_HERO_LOW:1, SAM_HERO_HIGH:1, SAM_HERO_ALT:1,
+      BSC_INFANTRY:1, BSC_PALISADE:1, BSC_DIET:1, BSC_SPEECH:1, BSC_MANIFESTO:1, BSC_CAVALRY:1 }
+  };
+
+  // ─── Scale実装テーブル（判断#2: H閾値Tier・全Tier実装） ───
+  // key = cardId + ':' + scaleRange[0]
+  var SCALE_IMPL = {
+    'HERO_FLAG:3':   { milFirstDiscount:{food:1} },
+    'HERO_FLAG:6':   { milFirstDiscount:{food:1}, milFirstAtk:2 },
+    'HERO_FLAG:9':   { endPreBattle:function(st,p){ p.turnATK+=4; p.resources.civ=Math.max(0,p.resources.civ-1); log(st,'  軍神の旗手[9+]: 全軍ATK+4 / C-1'); } },
+    'HERO_VIZIER:3': { polDiscount:{civ:1} },
+    'HERO_VIZIER:6': { polDiscount:{civ:1}, endGain:{fame:1} },
+    'HERO_VIZIER:9': { endGainAsleepOK:{fame:1} },
+    'VIK_HERO_HIGH:9': { logisticsReduce:2 },
+    'VIK_HERO_ALT:3': { startAuto:function(st,p){ p.cityHP-=1; gainRes(st,p,{food:3}); log(st,'  血斧の王[3-5]: HP-1→F+3'); } },
+    'VIK_HERO_ALT:6': { grantAct:{ text:'蛮勇:HP-2→敵1枚破壊', cost:{hp:2}, needsTarget:'enemyAny', op:'destroyTarget' } },
+    'VIK_HERO_ALT:9': { endPreBattle:function(st,p){ p.turnATK+=5; log(st,'  血斧の王[9+]: 常時ATK+5'); } },
+    'KNT_HERO_ALT:3': { grantAct:{ text:'手当:P1→HP+1', cost:{prod:1}, op:'heal', params:{n:1,max:10} } },
+    'KNT_HERO_ALT:6': { grantAct:{ text:'築城:P2→城壁(警備)Wake', cost:{prod:2}, needsTarget:'allySleepGarrison', op:'wakeTarget' } },
+    'KNT_HERO_ALT:9': { allyArmor:2 },
+    'SAM_HERO_HIGH:9': { hungerFame:true },
+    'SAM_HERO_ALT:3': { grantAct:{ text:'攪乱:C1→敵手札1枚捨て', cost:{civ:1}, op:'enemyDiscardRandom' } },
+    'SAM_HERO_ALT:6': { grantAct:{ text:'隠密:C2→敵Wake→手札', cost:{civ:2}, needsTarget:'enemyWake', op:'bounceToHand' } },
+    'SAM_HERO_ALT:9': { riotBonus:2 }
+  };
+
+  // ─── 基本ヘルパ ───
+  function genUID(st){ st.uidSeq=(st.uidSeq||0)+1; return 'u'+st.uidSeq; }
+  function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(rng()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t; } return a; }
+  var rng = Math.random;
+  function setRng(f){ rng = f; }
+  function log(st,msg){ st.log.push(msg); if(st.log.length>400) st.log.splice(0, st.log.length-400); }
+  function fail(st,msg){ log(st,'  ✗ '+msg); return false; }
+  function cur(st){ return st.players[st.current]; }
+  function enemyOf(st,p){ return st.players[ st.players[0]===p ? 1 : 0 ]; }
+  function pname(st,i){ return 'P'+(i+1)+'('+st.players[i].faction+')'; }
+  function defOf(inst){ return CARDS[inst.id]; }
+  function effectsOf(inst){ return defOf(inst).effects||[]; }
+  function name(inst){ return defOf(inst).name; }
+
+  function makeInst(st,id,state){
+    var d=CARDS[id];
+    var inst={ id:id, uid:genUID(st), state:state||'wake', actionUsed:false, tokens:0, logisticsWaived:false };
+    if(d.unit) inst.unit={ atk:d.unit.atk, def:d.unit.def, armor:d.unit.armor||0 };
+    return inst;
+  }
+  function resetInst(c){ // 場を離れたら状態リセット（tokens含む・判断: token持ち越しなし）
+    c.state='wake'; c.actionUsed=false; c.tokens=0; c.logisticsWaived=false; c.lootUsed=false;
+    if(CARDS[c.id].unit) c.unit={ atk:CARDS[c.id].unit.atk, def:CARDS[c.id].unit.def, armor:CARDS[c.id].unit.armor||0 };
+  }
+
+  function eachBoard(p,fn){ for(var s=0;s<SECTIONS.length;s++){ var sec=SECTIONS[s]; for(var i=0;i<p.board[sec].length;i++) fn(p.board[sec][i],sec); } }
+  function boardCards(p){ var out=[]; eachBoard(p,function(c){out.push(c);}); return out; }
+  function removeFromBoard(p,inst){ for(var s=0;s<SECTIONS.length;s++){ var sec=SECTIONS[s]; var i=p.board[sec].indexOf(inst); if(i>=0){ p.board[sec].splice(i,1); return sec; } } return null; }
+  function garrisonValue(inst){ var g=0,es=effectsOf(inst); for(var i=0;i<es.length;i++) if(es[i].garrison) g+=es[i].garrison; return g; }
+  function isRobust(inst){ var es=effectsOf(inst); for(var i=0;i<es.length;i++) if(es[i].keywords&&es[i].keywords.indexOf('robust')>=0) return true; return false; }
+  function hasLogistics(inst){ var es=effectsOf(inst); for(var i=0;i<es.length;i++) if(es[i].logistics>0) return true; return false; }
+  function unitDef(inst){ return inst.unit? inst.unit.def:0; }
+  function effUnitAtk(st,owner,inst){
+    if(inst.id==='KNT_HERO_HIGH') return owner.resources.fame; // Scale: ATK=H
+    return inst.unit? inst.unit.atk:0;
+  }
+  function armorBonusFor(p){ // 鉄の姫[9+] 全味方重装+2
+    var b=0, scales=activeScales(p);
+    for(var i=0;i<scales.length;i++) if(scales[i].impl.allyArmor) b+=scales[i].impl.allyArmor;
+    return b;
+  }
+  function effDEFTarget(p,inst){ // ターゲット判定用DEF（unit.def+armor+姫bonus）
+    var armor = inst.unit? ((inst.unit.armor||0)+armorBonusFor(p)) : 0;
+    return unitDef(inst)+armor;
+  }
+  function getWakeCount(p,sec){ var n=0; for(var i=0;i<p.board[sec].length;i++) if(p.board[sec][i].state==='wake') n++; return n; }
+  function getWakeLimit(p,sec){ var base = sec==='HERO'?1:3; return Math.max(0, base+((p.slotMod&&p.slotMod[sec])||0)); }
+  function placeCard(st,p,sec,inst){
+    p.board[sec].push(inst);
+    var limit=getWakeLimit(p,sec);
+    while(getWakeCount(p,sec)>limit){
+      var wakes=p.board[sec].filter(function(c){return c.state==='wake';});
+      if(!wakes.length) break;
+      wakes[0].state='sleep';
+      log(st,'  押し出し: '+name(wakes[0])+' → Sleep');
+    }
+  }
+
+  // ─── 資源 ───
+  function caps(p){
+    var c={}; for(var k in CONST.baseCaps) c[k]=CONST.baseCaps[k];
+    eachBoard(p,function(inst){
+      if(inst.state!=='wake') return;
+      var es=effectsOf(inst);
+      for(var i=0;i<es.length;i++) if(es[i].capMod) for(var kk in es[i].capMod) c[kk]=(c[kk]||0)+es[i].capMod[kk];
+    });
+    return c;
+  }
+  function lootBonus(st,p){ // 戦利品置場: F獲得時+1(1回/T/枚) 判断#3+#13
+    var total=0;
+    eachBoard(p,function(c){
+      if(c.state!=='wake'||c.lootUsed) return;
+      var es=effectsOf(c);
+      for(var i=0;i<es.length;i++) if(es[i].lootBonus){ c.lootUsed=true; total+=1; break; }
+    });
+    if(total>0) log(st,'  戦利品置場: F追加+'+total);
+    return total;
+  }
+  function gainRes(st,p,delta,opts){
+    opts=opts||{};
+    for(var k in delta){
+      var v=delta[k];
+      if(v>0 && k==='food' && !opts.noLoot) v+=lootBonus(st,p);
+      p.resources[k]=(p.resources[k]||0)+v;
+      if(opts.floor!=null && p.resources[k]<opts.floor) p.resources[k]=opts.floor;
+    }
+  }
+  function canPay(p,cost){
+    if(!cost) return true;
+    for(var k in cost){
+      if(k==='hp'){ if(p.cityHP<cost[k]) return false; }
+      else if((p.resources[k]||0)<cost[k]) return false;
+    }
+    return true;
+  }
+  function pay(p,cost){
+    if(!cost) return;
+    for(var k in cost){
+      if(k==='hp') p.cityHP-=cost[k];
+      else p.resources[k]-=cost[k];
+    }
+  }
+  function addCost(a,b){ var c={}; var k; for(k in (a||{})) c[k]=(c[k]||0)+a[k]; for(k in (b||{})) c[k]=(c[k]||0)+b[k]; return c; }
+
+  // ─── Scale ───
+  function activeScales(p){
+    var out=[], h=p.resources.fame;
+    for(var i=0;i<p.board.HERO.length;i++){
+      var inst=p.board.HERO[i], es=effectsOf(inst);
+      for(var j=0;j<es.length;j++){
+        var e=es[j];
+        if(!e.scaleRange) continue;
+        var impl=SCALE_IMPL[inst.id+':'+e.scaleRange[0]];
+        if(!impl) continue;
+        if(h<e.scaleRange[0] || h>e.scaleRange[1]) continue;
+        if(!impl.endGainAsleepOK && inst.state!=='wake') continue; // 大宰相[9+]のみSleep時OK
+        out.push({inst:inst, impl:impl, eff:e});
+      }
+    }
+    return out;
+  }
+
+  // ─── ターゲット ───
+  function getValidTargets(st,p,enemy,type){
+    var t=[];
+    function each(pl,fn){ eachBoard(pl,fn); }
+    switch(type){
+      case 'enemyWakeDef2': each(enemy,function(c){ if(c.state==='wake'&&effDEFTarget(enemy,c)<=2) t.push(c); }); break;
+      case 'enemySleep':    each(enemy,function(c){ if(c.state==='sleep') t.push(c); }); break;
+      case 'enemyDef1':     each(enemy,function(c){ if(effDEFTarget(enemy,c)<=1&&!isRobust(c)) t.push(c); }); break; // #10 堅固
+      case 'enemyDef2':     each(enemy,function(c){ if(effDEFTarget(enemy,c)<=2&&!isRobust(c)) t.push(c); }); break; // #10 堅固
+      case 'enemyWake':     each(enemy,function(c){ if(c.state==='wake') t.push(c); }); break;
+      case 'enemyWakeUnit': each(enemy,function(c){ if(c.state==='wake'&&c.unit) t.push(c); }); break;
+      case 'enemyUnit':     each(enemy,function(c){ if(c.unit) t.push(c); }); break;
+      case 'enemyAgrWake':  enemy.board.AGR.forEach(function(c){ if(c.state==='wake') t.push(c); }); break;
+      case 'enemyAny':      each(enemy,function(c){ if(!isRobust(c)) t.push(c); }); break; // 破壊用途のみ(#10)。粛清(enemySleep=政治)はrobustに通る
+      case 'allySleep':     each(p,function(c){ if(c.state==='sleep') t.push(c); }); break;
+      case 'allySleepMil':  p.board.MIL.forEach(function(c){ if(c.state==='sleep') t.push(c); }); break;
+      case 'allySleepGarrison': each(p,function(c){ if(c.state==='sleep'&&garrisonValue(c)>0) t.push(c); }); break;
+      case 'allyUnit':      each(p,function(c){ if(c.state==='wake'&&c.unit) t.push(c); }); break;
+      case 'allyAgrWake':   p.board.AGR.forEach(function(c){ if(c.state==='wake') t.push(c); }); break;
+      case 'allyLogistics': each(p,function(c){ if(c.state==='wake'&&hasLogistics(c)) t.push(c); }); break;
+      case 'handHero':      p.hand.forEach(function(c){ if(CARDS[c.id].section==='HERO') t.push(c); }); break;
+      case 'handGarrison':  p.hand.forEach(function(c){ if(garrisonValue(c)>0) t.push(c); }); break;
+    }
+    return t;
+  }
+  function findByUid(list,uid){ for(var i=0;i<list.length;i++) if(list[i].uid===uid) return list[i]; return null; }
+
+  // ─── DEF計算（判断#1: 警備は常時加算・unit.defはwake時のみ） ───
+  function calcDEF(p){
+    var d=0;
+    eachBoard(p,function(c){
+      if(c.state==='wake') d+=unitDef(c);
+      d+=garrisonValue(c);
+    });
+    return d+p.turnDEFBonus;
+  }
+
+  // ─── プレイヤー/ゲーム生成 ───
+  function picksToInsts(st,picks){
+    var out=[];
+    for(var id in picks) for(var i=0;i<picks[id];i++) out.push(makeInst(st,id,'wake'));
+    return out;
+  }
+  function newPlayer(st,faction,startPicks){
+    var deck=shuffle(picksToInsts(st,startPicks));
+    var hand=deck.splice(0,CONST.handSize);
+    return {
+      faction:faction, cityHP:CONST.cityHP,
+      resources:{food:CONST.startResources.food,prod:CONST.startResources.prod,civ:CONST.startResources.civ,fame:CONST.startResources.fame},
+      board:{AGR:[],IND:[],MIL:[],POL:[],HERO:[]},
+      hand:hand, deck:deck, discard:[], exile:[],
+      turnATK:0, turnDEFBonus:0,
+      prodMul:{food:1,prod:1,civ:1,fame:1}, slotMod:{},
+      lastDamageDealt:0, milFirstActUsed:false
+    };
+  }
+  function initSupply(st,picks){
+    var deck=shuffle(picksToInsts(st,picks));
+    var faceUp=deck.splice(0,Math.min(3,deck.length));
+    return { deck:deck, faceUp:faceUp, acquiredThisTurn:false };
+  }
+  function newGame(opts){
+    var st={ uidSeq:0, mode:opts.mode||'cpu', players:[], current:0, phase:'waiting', turn:0,
+             actionSection:null, supplies:[], winner:null, pending:null, log:[] };
+    for(var i=0;i<2;i++){
+      var f=opts.factions[i];
+      var dk=(opts.decks&&opts.decks[i])||null; // Phase③: カスタムデッキ注入（無指定=従来挙動）
+      st.players.push(newPlayer(st,f,(dk&&dk.starting)||DEFAULTS.starting));
+      var sup = (dk&&dk.supply)||FACTION_SUPPLY[f]||DEFAULTS.supply;
+      st.supplies.push(initSupply(st,sup));
+      if(dk) log(st,'P'+(i+1)+': カスタムデッキ'+(dk.name?'「'+dk.name+'」':'')+'を使用');
+    }
+    log(st,'ゲーム開始！ 先攻: P1('+opts.factions[0]+')'+(st.mode==='cpu'?' / P2=CPU':' / ホットシート2P'));
+    return st;
+  }
+
+  // ─── Startフェイズ ───
+  function drawTo(st,p,n){
+    while(p.hand.length<n){
+      if(!p.deck.length){
+        if(!p.discard.length) break;
+        p.deck=shuffle(p.discard.splice(0));
+        log(st,'  捨て札をリシャッフル('+p.deck.length+'枚)');
+      }
+      p.hand.push(p.deck.shift());
+    }
+  }
+  function startTurn(st){
+    if(st.phase!=='waiting') return false;
+    var p=cur(st);
+    st.turn+=1; st.phase='main'; st.actionSection=null;
+    log(st,'── ターン'+st.turn+' '+pname(st,st.current)+' ──');
+    drawTo(st,p,CONST.handSize);
+    // ターン値リセット（logisticsWaivedは兵站精算後にリセット=判断#8 祝杯fix）
+    p.turnATK=0; p.turnDEFBonus=0;
+    p.prodMul={food:1,prod:1,civ:1,fame:1}; p.slotMod={};
+    p.milFirstActUsed=false;
+    eachBoard(p,function(c){ c.actionUsed=false; c.lootUsed=false; });
+    // 兵站軽減合計
+    var logReduce=0;
+    eachBoard(p,function(c){
+      if(c.state!=='wake') return;
+      var es=effectsOf(c);
+      for(var i=0;i<es.length;i++) if(es[i].logisticsReduce) logReduce+=es[i].logisticsReduce;
+    });
+    var scales=activeScales(p);
+    for(var i=0;i<scales.length;i++) if(scales[i].impl.logisticsReduce) logReduce+=scales[i].impl.logisticsReduce;
+    // Start効果（兵站→op）
+    eachBoard(p,function(c){
+      if(c.state!=='wake') return;
+      var es=effectsOf(c);
+      for(var j=0;j<es.length;j++){
+        var e=es[j];
+        if(e.trigger!=='Start') continue;
+        if(e.logistics){
+          if(c.logisticsWaived){ log(st,'  '+name(c)+': 兵站免除(祝杯)'); continue; }
+          var cost=Math.max(0,e.logistics-logReduce);
+          if(p.resources.food>=cost){ p.resources.food-=cost; if(cost>0) log(st,'  '+name(c)+': 兵站F-'+cost); }
+          else { c.state='sleep'; log(st,'  '+name(c)+': 兵站不足→Sleep'); }
+        } else if(e.op){
+          log(st,'  '+name(c)+': '+e.text);
+          applyOp(st,p,enemyOf(st,p),c,e,null,{});
+        }
+      }
+    });
+    // Scale Start自動効果（血斧[3-5]）
+    scales=activeScales(p);
+    for(var k=0;k<scales.length;k++) if(scales[k].impl.startAuto) scales[k].impl.startAuto(st,p);
+    // 祝杯フラグ消費（判断#8: 精算後にリセット）
+    eachBoard(p,function(c){ c.logisticsWaived=false; });
+    checkWin(st);
+    return true;
+  }
+
+  // ─── プレイコスト（飢餓/暴動 修正込み） ───
+  function getPlayCost(st,p,def){
+    var enemy=enemyOf(st,p);
+    var cost={}; for(var k in (def.playCost||{})) cost[k]=def.playCost[k];
+    var hunger=0;
+    eachBoard(enemy,function(c){
+      if(c.state!=='wake') return;
+      var es=effectsOf(c);
+      for(var i=0;i<es.length;i++) if(es[i].hunger) hunger+=es[i].hunger;
+    });
+    var escl=activeScales(enemy);
+    for(var i2=0;i2<escl.length;i2++) if(escl[i2].impl.hungerFame) hunger+=enemy.resources.fame; // 天下人[9+]
+    if(hunger>0) cost.food=(cost.food||0)+hunger;
+    if(def.section==='POL'){
+      var riot=0;
+      eachBoard(enemy,function(c){
+        if(c.state!=='wake') return;
+        var es=effectsOf(c);
+        for(var i3=0;i3<es.length;i3++) if(es[i3].riot) riot+=es[i3].riot;
+      });
+      for(var i4=0;i4<escl.length;i4++) if(escl[i4].impl.riotBonus) riot+=escl[i4].impl.riotBonus; // 影の支配者[9+]
+      if(riot>0) cost.civ=(cost.civ||0)+riot;
+    }
+    return cost;
+  }
+
+  function listPlayable(st){
+    var p=cur(st), enemy=enemyOf(st,p), out=[];
+    for(var i=0;i<p.hand.length;i++){
+      var c=p.hand[i], def=CARDS[c.id];
+      var cost=getPlayCost(st,p,def);
+      var needsTarget=null, targets=null;
+      if(def.type==='Operation'){
+        var eff=null, es=def.effects||[];
+        for(var j=0;j<es.length;j++) if(es[j].trigger==='Play'){ eff=es[j]; break; }
+        if(eff&&eff.needsTarget){ needsTarget=eff.needsTarget; targets=getValidTargets(st,p,enemy,needsTarget); }
+      }
+      var blocked = targets!==null && targets.length===0;
+      out.push({ handIdx:i, uid:c.uid, id:c.id, cost:cost,
+                 canPlay: st.phase==='main' && canPay(p,cost) && !blocked,
+                 needsTarget:needsTarget, targets:targets, blocked:blocked });
+    }
+    return out;
+  }
+
+  function playCard(st,handIdx,targetUid){
+    if(st.phase!=='main'||st.pending) return fail(st,'今はプレイできない');
+    var p=cur(st), enemy=enemyOf(st,p);
+    var c=p.hand[handIdx];
+    if(!c) return false;
+    var def=CARDS[c.id];
+    var cost=getPlayCost(st,p,def);
+    if(!canPay(p,cost)) return fail(st,'コスト不足: '+def.name);
+    if(def.type==='Operation'){
+      var eff=null, es=def.effects||[];
+      for(var j=0;j<es.length;j++) if(es[j].trigger==='Play'){ eff=es[j]; break; }
+      var target=null;
+      if(eff&&eff.needsTarget){
+        var targets=getValidTargets(st,p,enemy,eff.needsTarget);
+        if(!targets.length) return fail(st,def.name+': 有効なターゲットなし');
+        target=findByUid(targets,targetUid);
+        if(!target) return {need:'target',targets:targets};
+      }
+      pay(p,cost);
+      p.hand.splice(handIdx,1);
+      log(st,'  '+def.name+(eff?': '+eff.text:''));
+      if(eff) applyOp(st,p,enemy,c,eff,target,{});
+      p.exile.push(c); // Operationは追放へ（JSX準拠）
+      checkWin(st);
+      return true;
+    }
+    // Nationカード配置
+    pay(p,cost);
+    p.hand.splice(handIdx,1);
+    c.state='wake'; c.actionUsed=false; c.logisticsWaived=false; c.tokens=c.tokens||0;
+    if(def.unit) c.unit={atk:def.unit.atk,def:def.unit.def,armor:def.unit.armor||0}; // 配置時unit初期化（JSX準拠）
+    placeCard(st,p,def.section,c);
+    log(st,'  配置: '+def.name+' → '+def.section);
+    return true;
+  }
+
+  // ─── アクション ───
+  function actCostFor(st,p,inst,eff){
+    var cost={}; for(var k in (eff.cost||{})) cost[k]=eff.cost[k];
+    var def=CARDS[inst.id], scales=activeScales(p);
+    if(def.section==='MIL' && !p.milFirstActUsed){
+      for(var i=0;i<scales.length;i++) if(scales[i].impl.milFirstDiscount && cost.food)
+        cost.food=Math.max(0,cost.food-scales[i].impl.milFirstDiscount.food); // 旗手[3-8]
+    }
+    if(def.section==='POL'){
+      for(var j=0;j<scales.length;j++) if(scales[j].impl.polDiscount && cost.civ)
+        cost.civ=Math.max(0,cost.civ-scales[j].impl.polDiscount.civ); // 大宰相[3-8]
+    }
+    return cost;
+  }
+
+  function listActs(st,sec){
+    var p=cur(st), enemy=enemyOf(st,p), out=[];
+    if(st.phase!=='main') return out;
+    if(st.actionSection!==null && st.actionSection!==sec) return out;
+    for(var i=0;i<p.board[sec].length;i++){
+      var inst=p.board[sec][i];
+      if(inst.actionUsed) continue;
+      var es=effectsOf(inst);
+      for(var j=0;j<es.length;j++){
+        var e=es[j];
+        if(e.trigger!=='Act') continue;
+        var isRe = e.op==='reawaken';
+        // 判断#9: 再起はSleep時のみ・通常ActはWake時のみ
+        if(isRe ? inst.state!=='sleep' : inst.state!=='wake') continue;
+        var cost=actCostFor(st,p,inst,e);
+        var targets=e.needsTarget? getValidTargets(st,p,enemy,e.needsTarget):null;
+        if(targets&&!targets.length) continue;
+        var boostMax=e.boost? Math.min(e.boost.max, Math.floor((p.resources[e.boost.resource]||0)/e.boost.perUnit)):0;
+        out.push({uid:inst.uid,effIdx:j,text:e.text,cost:cost,canPay:canPay(p,cost),
+                  needsTarget:e.needsTarget||null,targets:targets,boost:e.boost||null,boostMax:boostMax,scale:false});
+      }
+      if(sec==='HERO'){
+        var scales=activeScales(p);
+        for(var k=0;k<scales.length;k++){
+          var s=scales[k];
+          if(s.inst!==inst||!s.impl.grantAct) continue;
+          var ga=s.impl.grantAct;
+          var gts=ga.needsTarget? getValidTargets(st,p,enemy,ga.needsTarget):null;
+          if(gts&&!gts.length) continue;
+          out.push({uid:inst.uid,scaleKey:inst.id+':'+s.eff.scaleRange[0],text:ga.text,cost:ga.cost||{},
+                    canPay:canPay(p,ga.cost),needsTarget:ga.needsTarget||null,targets:gts,boost:null,boostMax:0,scale:true});
+        }
+      }
+    }
+    return out;
+  }
+
+  function doAct(st,sec,uid,opts){
+    opts=opts||{};
+    if(st.phase!=='main'||st.pending) return fail(st,'今は起動できない');
+    var p=cur(st), enemy=enemyOf(st,p);
+    if(st.actionSection!==null && st.actionSection!==sec) return fail(st,'このターンは'+CONST.secNames[st.actionSection]+'セクション起動中');
+    var inst=findByUid(p.board[sec],uid);
+    if(!inst||inst.actionUsed) return false;
+    var eff=null;
+    if(opts.scaleKey){
+      var impl=SCALE_IMPL[opts.scaleKey];
+      if(!impl||!impl.grantAct) return false;
+      // 有効性再確認
+      var ok=false, scs=activeScales(p);
+      for(var i=0;i<scs.length;i++) if(scs[i].inst===inst&&scs[i].impl===impl) ok=true;
+      if(!ok) return fail(st,'Scale効果が現在のHでは無効');
+      eff=impl.grantAct;
+    } else {
+      eff=effectsOf(inst)[opts.effIdx];
+      if(!eff||eff.trigger!=='Act') return false;
+      var isRe=eff.op==='reawaken';
+      if(isRe ? inst.state!=='sleep' : inst.state!=='wake') return fail(st,'起動条件を満たさない');
+    }
+    var cost=actCostFor(st,p,inst,eff);
+    var boostN=0;
+    if(eff.boost){
+      boostN=Math.min(opts.boost||0, eff.boost.max, Math.floor((p.resources[eff.boost.resource]||0)/eff.boost.perUnit));
+      if(boostN<0) boostN=0;
+    }
+    var totalCost = eff.boost? addCost(cost, (function(){var o={};o[eff.boost.resource]=boostN*eff.boost.perUnit;return o;})()) : cost;
+    if(!canPay(p,totalCost)) return fail(st,name(inst)+': コスト不足');
+    var target=null;
+    if(eff.needsTarget){
+      var targets=getValidTargets(st,p,enemy,eff.needsTarget);
+      if(!targets.length) return fail(st,name(inst)+': ターゲットなし');
+      target=findByUid(targets,opts.targetUid);
+      if(!target) return {need:'target',targets:targets};
+    }
+    // 確定
+    if(st.actionSection===null){ st.actionSection=sec; log(st,'  ▼ アクション: '+CONST.secNames[sec]+'セクション'); }
+    pay(p,totalCost);
+    inst.actionUsed=true;
+    // 旗手: 初回軍事Act
+    if(CARDS[inst.id].section==='MIL' && !p.milFirstActUsed){
+      var scl=activeScales(p);
+      for(var m=0;m<scl.length;m++) if(scl[m].impl.milFirstAtk){ p.turnATK+=scl[m].impl.milFirstAtk; log(st,'  軍神の旗手: 初回軍事ATK+'+scl[m].impl.milFirstAtk); }
+      p.milFirstActUsed=true;
+    }
+    log(st,'  '+name(inst)+': '+eff.text+(boostN?(' (Boost+'+boostN+')'):''));
+    applyOp(st,p,enemy,inst,eff,target,{boost:boostN,target2Uid:opts.target2Uid});
+    checkWin(st);
+    return true;
+  }
+
+  // ─── op インタープリタ（29 + scale内部3） ───
+  function destroyToDiscard(st,owner,target){
+    removeFromBoard(owner,target); resetInst(target); owner.discard.push(target);
+    log(st,'  '+name(target)+' 破壊→捨て札');
+  }
+  function applyOp(st,p,enemy,inst,eff,target,ctx){
+    ctx=ctx||{};
+    if(typeof ECG_OP_HOOK!=='undefined'&&ECG_OP_HOOK) ECG_OP_HOOK(eff.op); // 検証用フック
+    var P=eff.params||{};
+    switch(eff.op){
+      case 'res': {
+        var tgt = P.target==='enemy'? enemy:p;
+        gainRes(st,tgt,P.delta,{floor:P.floor});
+        break; }
+      case 'tokenAdd': inst.tokens=(inst.tokens||0)+P.n; break;
+      case 'tokenRelease': { var d={}; d[P.to]=inst.tokens||0; gainRes(st,p,d); inst.tokens=0; break; }
+      case 'speechTokens': {
+        var t=inst.tokens||0;
+        if(t>0 && p.resources[P.spendRes]>=t){ p.resources[P.spendRes]-=t; var g={}; g[P.gainRes]=t; gainRes(st,p,g); inst.tokens=0; }
+        else log(st,'  (トークン0かC不足で演説不発)');
+        break; }
+      case 'atk': p.turnATK += P.n + (P.plusUnitAtk?effUnitAtk(st,p,inst):0) + (ctx.boost||0); break;
+      case 'atkSelfDamage': p.cityHP-=P.hp; p.turnATK += P.n + (P.plusUnitAtk?effUnitAtk(st,p,inst):0); break;
+      case 'sleepTarget': target.state='sleep'; break;
+      case 'wakeTarget': target.state='wake'; break;
+      case 'wakeAllAllies': eachBoard(p,function(c){ if(c.state==='sleep') c.state='wake'; }); break;
+      case 'exileTarget': { removeFromBoard(enemy,target); resetInst(target); enemy.exile.push(target); log(st,'  '+name(target)+'→追放'); break; }
+      case 'slotMod': {
+        p.slotMod={}; for(var k in P.mod) p.slotMod[k]=P.mod[k];
+        if(P.sleepExcess){
+          var sec=P.sleepExcess;
+          while(getWakeCount(p,sec)>getWakeLimit(p,sec)){
+            var w=p.board[sec].filter(function(c){return c.state==='wake';});
+            if(!w.length) break;
+            w[0].state='sleep'; log(st,'  '+name(w[0])+'→Sleep(枠超過)');
+          }
+        }
+        break; }
+      case 'prodMul': p.prodMul[P.res]=P.mul; break;
+      case 'wartimeSwap': { // 判断#5: 二段目配線
+        target.state='sleep';
+        var t2s=getValidTargets(st,p,enemy,P.thenWakeTarget||'allySleepMil');
+        if(t2s.length){
+          var t2=findByUid(t2s,ctx.target2Uid);
+          if(t2){ t2.state='wake'; log(st,'  '+name(t2)+'→Wake'); }
+          else { st.pending={type:'wartime2', actorUid:inst.uid}; log(st,'  …MIL Sleepを1枚Wakeに選択'); }
+        }
+        break; }
+      case 'siegeDamage': {
+        if(!target.unit) break;
+        target.unit.def-=P.n;
+        if(target.unit.def<=0){
+          var excess=Math.abs(target.unit.def);
+          destroyToDiscard(st,enemy,target);
+          if(P.pierceToCity&&excess>0){ enemy.cityHP-=excess; log(st,'  攻城貫通: 敵都市HP-'+excess); }
+        }
+        break; }
+      case 'reawaken': inst.state='wake'; break;
+      case 'deployFromHand': {
+        var hi=p.hand.indexOf(target);
+        if(hi<0) break;
+        p.hand.splice(hi,1);
+        target.state=P.state||'wake'; target.actionUsed=false;
+        if(CARDS[target.id].unit) target.unit={atk:CARDS[target.id].unit.atk,def:CARDS[target.id].unit.def,armor:CARDS[target.id].unit.armor||0};
+        placeCard(st,p,CARDS[target.id].section,target);
+        log(st,'  '+name(target)+'→Wake配置');
+        break; }
+      case 'spendOrSleep': {
+        if(canPay(p,P.spend)){ pay(p,P.spend); gainRes(st,p,P.gain); }
+        else { inst.state='sleep'; log(st,'  '+name(inst)+': 支払不能→Sleep'); }
+        break; }
+      case 'onLastDamageGain': if(p.lastDamageDealt>0) gainRes(st,p,P.delta); else log(st,'  (前T都市ダメなし)'); break;
+      case 'waiveLogistics': target.logisticsWaived=true; break; // 判断#8: 次Start兵站まで生存
+      case 'sleepTargetAndGain': target.state='sleep'; gainRes(st,p,P.delta); break;
+      case 'fameFromRes': { var n=Math.floor((p.resources[P.res]||0)/P.div); if(n>0){ gainRes(st,p,{fame:n}); } break; }
+      case 'atkPerLogisticsAlly': {
+        for(var x=0;x<p.board.MIL.length;x++){ var c2=p.board.MIL[x]; if(c2.state==='wake'&&hasLogistics(c2)) p.turnATK+=P.n; }
+        break; }
+      case 'defBonus': {
+        var nb=P.n;
+        if(P.formula==='floor(H/2)') nb=Math.floor(p.resources.fame/2);
+        p.turnDEFBonus+=nb;
+        break; }
+      case 'buffUnit': if(target.unit){ target.unit.atk+=P.atk; target.unit.def+=P.def; } break;
+      case 'heal': p.cityHP=Math.min(p.cityHP+P.n,P.max||CONST.cityHP); break;
+      case 'duel': { // unit.def恒久減少（場にある間）・判断#7 JSX準拠
+        if(!target.unit||!inst.unit) break;
+        var myA=effUnitAtk(st,p,inst), foeA=effUnitAtk(st,enemy,target);
+        target.unit.def-=myA;
+        inst.unit.def-=foeA;
+        log(st,'  一騎討ち: 与'+myA+'/被'+foeA);
+        if(target.unit.def<=0) destroyToDiscard(st,enemy,target);
+        if(inst.unit.def<=0){ inst.state='sleep'; log(st,'  '+name(inst)+'は深手→Sleep'); }
+        break; }
+      case 'deckPeek': { // 3枚見て1枚選択（pending経由）
+        var top=p.deck.splice(0,P.look);
+        if(!top.length){ log(st,'  山札が空'); break; }
+        st.pending={type:'peek', cards:top, shuffleBack:!!P.shuffleBack};
+        break; }
+      case 'sleepAndDamage': { // 判断#6: def<=0で破壊
+        target.state='sleep';
+        if(target.unit){
+          target.unit.def-=P.n;
+          if(target.unit.def<=0) destroyToDiscard(st,enemy,target);
+        }
+        break; }
+      case 'summonToken': {
+        var tok=makeInst(st,P.cardId,P.state||'wake');
+        placeCard(st,p,P.section,tok);
+        log(st,'  '+CARDS[P.cardId].name+'を場に出した');
+        break; }
+      // ── Scale付与Act内部op ──
+      case 'destroyTarget': destroyToDiscard(st,enemy,target); break;
+      case 'enemyDiscardRandom': {
+        if(enemy.hand.length){
+          var ri=Math.floor(rng()*enemy.hand.length);
+          var rc=enemy.hand.splice(ri,1)[0];
+          resetInst(rc); enemy.discard.push(rc);
+          log(st,'  敵の'+name(rc)+'を捨てさせた');
+        } else log(st,'  (敵手札なし)');
+        break; }
+      case 'bounceToHand': { removeFromBoard(enemy,target); resetInst(target); enemy.hand.push(target); log(st,'  '+name(target)+'→敵手札へ'); break; }
+      default: log(st,'  ⚠ 未実装op: '+eff.op);
+    }
+  }
+
+  // ─── pending解決 ───
+  function finishPeek(st,pickUid){
+    if(!st.pending||st.pending.type!=='peek') return false;
+    var p=cur(st);
+    var cards=st.pending.cards;
+    var pick=findByUid(cards,pickUid)||cards[0];
+    p.hand.push(pick);
+    for(var i=0;i<cards.length;i++) if(cards[i]!==pick) p.deck.push(cards[i]);
+    if(st.pending.shuffleBack) shuffle(p.deck);
+    log(st,'  '+name(pick)+'を手札へ');
+    st.pending=null;
+    return true;
+  }
+  function finishWartime2(st,uid){
+    if(!st.pending||st.pending.type!=='wartime2') return false;
+    var p=cur(st);
+    var t2s=getValidTargets(st,p,enemyOf(st,p),'allySleepMil');
+    var t2=findByUid(t2s,uid);
+    if(t2){ t2.state='wake'; log(st,'  '+name(t2)+'→Wake'); }
+    st.pending=null;
+    return true;
+  }
+
+  // ─── Endフェイズ（生産→Scale→戦闘→循環→clamp） ───
+  function endMain(st){
+    if(st.phase!=='main') return false;
+    if(st.pending) return fail(st,'選択を完了してから');
+    var p=cur(st), enemy=enemyOf(st,p);
+    st.phase='end';
+    // ① 生産（差分計測×prodMul、JSX準拠）
+    var pd={food:0,prod:0,civ:0,fame:0};
+    eachBoard(p,function(c){
+      if(c.state!=='wake') return;
+      var es=effectsOf(c);
+      for(var i=0;i<es.length;i++){
+        var e=es[i];
+        if(e.trigger!=='Pas') continue;
+        if(e.op==='res'){
+          var bf={food:p.resources.food,prod:p.resources.prod,civ:p.resources.civ,fame:p.resources.fame};
+          gainRes(st,p,e.params.delta);
+          pd.food+=p.resources.food-bf.food; pd.prod+=p.resources.prod-bf.prod;
+          pd.civ+=p.resources.civ-bf.civ; pd.fame+=p.resources.fame-bf.fame;
+        } else if(e.op==='tokenAdd'){ applyOp(st,p,enemyOf(st,p),c,e,null,{}); }
+      }
+    });
+    if(p.prodMul.food>1){ var exf=pd.food*(p.prodMul.food-1); if(exf>0){ p.resources.food+=exf; log(st,'  豊作: F追加+'+exf); } }
+    if(p.prodMul.prod>1){ var exp=pd.prod*(p.prodMul.prod-1); if(exp>0){ p.resources.prod+=exp; log(st,'  動員: P追加+'+exp); } }
+    log(st,'  生産: F+'+(pd.food*p.prodMul.food)+' P+'+(pd.prod*p.prodMul.prod)+' C+'+pd.civ+' H+'+pd.fame);
+    // ② Scale End効果
+    var scales=activeScales(p);
+    for(var s=0;s<scales.length;s++){
+      var im=scales[s].impl;
+      if(im.endGain){ gainRes(st,p,im.endGain); log(st,'  '+name(scales[s].inst)+': End H+1'); }
+      if(im.endGainAsleepOK){ gainRes(st,p,im.endGainAsleepOK); log(st,'  '+name(scales[s].inst)+'[9+]: H+1(Sleep可)'); }
+      if(im.endPreBattle) im.endPreBattle(st,p);
+    }
+    // ③ 戦闘
+    var atk=p.turnATK, def=calcDEF(enemy);
+    var dmg=Math.max(0,atk-def);
+    p.lastDamageDealt=dmg;
+    if(dmg>0){ enemy.cityHP-=dmg; log(st,'  戦闘: ATK'+atk+' vs DEF'+def+' → '+dmg+'ダメージ!'); }
+    else log(st,'  戦闘: ATK'+atk+' vs DEF'+def+' → ブロック');
+    if(checkWin(st)) return true;
+    // ④ 循環: Sleep→捨て札（expendable/Token→追放）
+    for(var si=0;si<SECTIONS.length;si++){
+      var sec=SECTIONS[si], keep=[];
+      for(var ci=0;ci<p.board[sec].length;ci++){
+        var c3=p.board[sec][ci];
+        if(c3.state==='sleep'){
+          var es3=effectsOf(c3), expend=false;
+          for(var e3=0;e3<es3.length;e3++) if(es3[e3].keywords&&es3[e3].keywords.indexOf('expendable')>=0) expend=true;
+          var isToken=CARDS[c3.id].tags.indexOf('Token')>=0;
+          resetInst(c3);
+          if(expend||isToken){ p.exile.push(c3); log(st,'  '+name(c3)+': 追放'+(isToken?'(トークン)':'(使い捨て)')); }
+          else { p.discard.push(c3); log(st,'  '+name(c3)+': 循環→捨て札'); }
+        } else keep.push(c3);
+      }
+      p.board[sec]=keep;
+    }
+    // ⑤ 資源clamp（Burst: Endのみ）
+    var cp=caps(p);
+    p.resources.food=Math.min(p.resources.food,cp.food);
+    p.resources.prod=Math.min(p.resources.prod,cp.prod);
+    p.resources.civ=Math.min(p.resources.civ,cp.civ);
+    st.phase='buy';
+    st.supplies[st.current].acquiredThisTurn=false;
+    return true;
+  }
+
+  // ─── Buyフェイズ ───
+  function acquire(st,choice){
+    if(st.phase!=='buy') return false;
+    var sup=st.supplies[st.current], p=cur(st);
+    if(sup.acquiredThisTurn) return fail(st,'今ターン獲得済み');
+    var got=null;
+    if(choice.type==='faceUp'){
+      if(choice.index<0||choice.index>=sup.faceUp.length) return false;
+      got=sup.faceUp.splice(choice.index,1)[0];
+      if(sup.deck.length) sup.faceUp.splice(choice.index,0,sup.deck.shift());
+    } else if(choice.type==='blind'){
+      if(!sup.deck.length) return false;
+      got=sup.deck.shift();
+    }
+    if(!got) return false;
+    p.discard.push(got);
+    sup.acquiredThisTurn=true;
+    log(st,'  獲得: '+name(got));
+    return true;
+  }
+  function endTurn(st){
+    if(st.phase!=='buy') return false;
+    st.actionSection=null;
+    st.current=1-st.current;
+    st.phase='waiting';
+    log(st,'  ターン終了 → '+pname(st,st.current)+'の番');
+    return true;
+  }
+
+  function checkWin(st){
+    if(st.winner!==null) return true;
+    for(var i=0;i<2;i++){
+      if(st.players[i].cityHP<=0){
+        st.winner=1-i; st.phase='over';
+        log(st,'★ '+pname(st,1-i)+' の勝利！ ★');
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // ─── 公開API ───
+  return {
+    init:init, newGame:newGame, setRng:setRng,
+    startTurn:startTurn, listPlayable:listPlayable, playCard:playCard,
+    listActs:listActs, doAct:doAct, finishPeek:finishPeek, finishWartime2:finishWartime2,
+    endMain:endMain, acquire:acquire, endTurn:endTurn,
+    calcDEF:calcDEF, caps:caps, getPlayCost:getPlayCost,
+    getValidTargets:getValidTargets, activeScales:activeScales,
+    getWakeCount:getWakeCount, getWakeLimit:getWakeLimit,
+    garrisonValue:garrisonValue, effDEFTarget:effDEFTarget, effUnitAtk:effUnitAtk,
+    cardDef:function(id){ return CARDS[id]; }, allCards:function(){ return CARDS; },
+    deckRules:function(){ return RULES; }, defaultDecks:function(){ return DEFAULTS; },
+    SECTIONS:SECTIONS, FACTION_SUPPLY:FACTION_SUPPLY,
+    constants:function(){ return CONST; }
+  };
+})();
+if(typeof module!=='undefined'&&module.exports) module.exports=ECG;
+
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   ECG AI — 簡易ヒューリスティックCPU（Phase②最小AI）
+   DOM非依存。ECG engine API のみ使用。
+   ═══════════════════════════════════════════════════════════════ */
+'use strict';
+var ECG_AI = (function(){
+
+  function rnd(a){ return a[Math.floor(Math.random()*a.length)]; }
+
+  // ターゲット選択ヒューリスティック
+  function pickTarget(st, p, enemy, type, targets){
+    if(!targets||!targets.length) return null;
+    var best=targets[0], bestScore=-1e9;
+    for(var i=0;i<targets.length;i++){
+      var t=targets[i], d=ECG.cardDef(t.id), score=0;
+      var isEnemyTarget = type.indexOf('enemy')===0;
+      if(isEnemyTarget){
+        // 敵への妨害: 価値の高いものを狙う
+        score += ECG.garrisonValue(t)*3;
+        if(t.unit) score += t.unit.atk*2 + t.unit.def;
+        if(d.section==='HERO') score += 8;
+        if(d.section==='AGR') score += 2;
+        if(t.state==='wake') score += 2;
+      } else if(type==='handHero'||type==='handGarrison'){
+        score += ECG.garrisonValue(t)*2;
+        if(t.unit) score += t.unit.def;
+        if(d.section==='HERO') score += 5;
+      } else {
+        // 味方支援: wake対象は強いもの、buffはATK高いもの
+        if(t.unit) score += t.unit.atk*2 + t.unit.def;
+        score += ECG.garrisonValue(t)*2;
+        if(d.section==='MIL') score += 3;
+      }
+      if(score>bestScore){ bestScore=score; best=t; }
+    }
+    return best;
+  }
+
+  function countEconomy(p){
+    var n=0;
+    ECG.SECTIONS.forEach(function(sec){
+      p.board[sec].forEach(function(c){
+        var es=ECG.cardDef(c.id).effects||[];
+        for(var i=0;i<es.length;i++) if(es[i].trigger==='Pas'&&(es[i].op==='res'||es[i].op==='tokenAdd')) n++;
+      });
+    });
+    return n;
+  }
+
+  function scoreHandCard(st, p, enemy, item){
+    var d=ECG.cardDef(p.hand[item.handIdx].id);
+    var s=0, econ=countEconomy(p);
+    if(d.type==='Operation'){
+      if(item.blocked) return -1;
+      s=18;
+      if(d.id==='VIK_OP_RAID') s+=6; // 資源直得
+      return s;
+    }
+    var es=d.effects||[];
+    var hasPasRes=false, hasCap=false, hasGarrison=false;
+    for(var i=0;i<es.length;i++){
+      if(es[i].trigger==='Pas'&&(es[i].op==='res'||es[i].op==='tokenAdd')) hasPasRes=true;
+      if(es[i].capMod) hasCap=true;
+      if(es[i].garrison) hasGarrison=true;
+    }
+    if(hasPasRes) s += (st.turn<8? 26:14) - econ*2;
+    if(hasCap){
+      var caps=ECG.caps(p);
+      for(var k in (es.find(function(e){return e.capMod;})||{}).capMod||{}){
+        if(p.resources[k]>=caps[k]-1) s+=10;
+      }
+      s+=4;
+    }
+    if(hasGarrison) s += (p.cityHP<=7? 22:10);
+    if(d.unit){ s += 12 + d.unit.atk*2; if(ECG.getWakeCount(p,'MIL')>=3) s-=8; if(st.turn>12) s+=8; }
+    if(d.section==='HERO'){ s += (p.board.HERO.length===0? 16:2); }
+    return s;
+  }
+
+  function aiMainPhase(st){
+    var p=st.players[st.current], enemy=st.players[1-st.current];
+    // ── プレイループ（貪欲・最大8枚） ──
+    var guard=0;
+    while(guard++<10){
+      var plays=ECG.listPlayable(st).filter(function(x){ return x.canPlay; });
+      if(!plays.length) break;
+      var best=null, bestS=2; // 閾値: 価値2未満は出さない
+      for(var i=0;i<plays.length;i++){
+        var s=scoreHandCard(st,p,enemy,plays[i]);
+        if(s>bestS){ bestS=s; best=plays[i]; }
+      }
+      if(!best) break;
+      var tuid;
+      if(best.needsTarget){
+        var t=pickTarget(st,p,enemy,best.needsTarget,best.targets);
+        tuid=t? t.uid:null;
+        if(!tuid) break;
+      }
+      var r=ECG.playCard(st,best.handIdx,tuid);
+      if(r!==true) break;
+      resolvePending(st);
+    }
+    // ── アクションセクション選択 ──
+    var bestSec=null, bestVal=0;
+    ECG.SECTIONS.forEach(function(sec){
+      var acts=ECG.listActs(st,sec).filter(function(a){return a.canPay;});
+      if(!acts.length) return;
+      var val=0;
+      var enemyDEF=ECG.calcDEF(enemy);
+      acts.forEach(function(a){
+        var inst=null;
+        p.board[sec].forEach(function(c){ if(c.uid===a.uid) inst=c; });
+        var d=inst? ECG.cardDef(inst.id):null;
+        var es=d? (d.effects||[]):[];
+        var e=a.scale? null : es[a.effIdx];
+        var op=a.scale? null : (e? e.op:null);
+        if(op==='atk'||op==='atkSelfDamage'||op==='atkPerLogisticsAlly') val+=4;
+        else if(op==='tokenRelease'&&inst&&inst.tokens>=2) val+=5;
+        else if(op==='res') val+=3;
+        else if(op==='sleepTarget'||op==='exileTarget') val+=4;
+        else if(op==='wakeTarget'||op==='wakeAllAllies'||op==='reawaken') val+=3;
+        else if(op==='duel'||op==='siegeDamage') val+=4;
+        else if(op==='heal'&&p.cityHP<=7) val+=4;
+        else if(op==='prodMul') val+=3;
+        else val+=2;
+      });
+      // MIL優先補正: 攻撃が通りそうなら大きく加点／長期戦は攻勢に倒す（膠着回避）
+      if(sec==='MIL'){
+        var potential=0;
+        acts.forEach(function(a){ potential+=3; });
+        if(p.turnATK+potential>ECG.calcDEF(enemy)) val+=8;
+        if(st.turn>12) val+=5;
+        if(st.turn>20) val+=6;   // 膠着抑止: 中盤以降段階的に攻勢へ
+        if(st.turn>30) val+=12;
+      }
+      if(val>bestVal){ bestVal=val; bestSec=sec; }
+    });
+    if(bestSec){
+      var guard2=0;
+      while(guard2++<12){
+        var acts2=ECG.listActs(st,bestSec).filter(function(a){return a.canPay;});
+        if(!acts2.length) break;
+        var a=acts2[0];
+        var opts={effIdx:a.effIdx, scaleKey:a.scaleKey};
+        if(a.boost) opts.boost=Math.min(a.boostMax, Math.max(0,(p.resources[a.boost.resource]||0)-1));
+        if(a.needsTarget){
+          var tt=pickTarget(st,p,enemy,a.needsTarget,a.targets);
+          if(!tt) break;
+          opts.targetUid=tt.uid;
+        }
+        var r2=ECG.doAct(st,bestSec,a.uid,opts);
+        if(r2!==true) break;
+        resolvePending(st);
+      }
+    }
+  }
+
+  function resolvePending(st){
+    if(!st.pending) return;
+    var p=st.players[st.current], enemy=st.players[1-st.current];
+    if(st.pending.type==='peek'){
+      // 公開された3枚から価値スコア最大を取る
+      var cards=st.pending.cards, best=cards[0], bestS=-1;
+      for(var i=0;i<cards.length;i++){
+        var d=ECG.cardDef(cards[i].id), s=0;
+        if(d.unit) s+=d.unit.atk+d.unit.def;
+        s+=ECG.garrisonValue(cards[i])*2;
+        var es=d.effects||[];
+        for(var j=0;j<es.length;j++) if(es[j].trigger==='Pas'&&es[j].op==='res') s+=3;
+        if(s>bestS){ bestS=s; best=cards[i]; }
+      }
+      ECG.finishPeek(st,best.uid);
+    } else if(st.pending.type==='wartime2'){
+      var t2s=ECG.getValidTargets(st,p,enemy,'allySleepMil');
+      ECG.finishWartime2(st, t2s.length? t2s[0].uid:null);
+    }
+  }
+
+  function aiBuyPhase(st){
+    var p=st.players[st.current];
+    var sup=st.supplies[st.current];
+    if(!sup.faceUp.length && !sup.deck.length) return;
+    var econ=countEconomy(p);
+    var best=-1, bestS=-1;
+    for(var i=0;i<sup.faceUp.length;i++){
+      var d=ECG.cardDef(sup.faceUp[i].id), s=1;
+      var es=d.effects||[];
+      var hasPasRes=false;
+      for(var j=0;j<es.length;j++) if(es[j].trigger==='Pas'&&(es[j].op==='res'||es[j].op==='tokenAdd')) hasPasRes=true;
+      if(hasPasRes) s += (econ<4? 8:3);
+      if(d.unit) s += 5 + d.unit.atk + (st.turn>12? 6:0);
+      if(ECG.garrisonValue(sup.faceUp[i])>0) s += (p.cityHP<=7? 8:4);
+      if(d.section==='HERO') s += (p.board.HERO.length===0? 6:1);
+      if(d.type==='Operation') s += 3 + (st.turn>15? 4:0);
+      if(s>bestS){ bestS=s; best=i; }
+    }
+    // 20%でブラインド（多様性）
+    if(sup.deck.length && Math.random()<0.2) ECG.acquire(st,{type:'blind'});
+    else if(best>=0) ECG.acquire(st,{type:'faceUp',index:best});
+    else if(sup.deck.length) ECG.acquire(st,{type:'blind'});
+  }
+
+  // 1ターン丸ごと実行（phase=waiting想定）
+  function takeTurn(st){
+    if(st.phase!=='waiting'||st.winner!==null) return;
+    ECG.startTurn(st);
+    if(st.winner!==null) return;
+    resolvePending(st);
+    aiMainPhase(st);
+    resolvePending(st);
+    ECG.endMain(st);
+    if(st.winner!==null) return;
+    aiBuyPhase(st);
+    ECG.endTurn(st);
+  }
+
+  return { takeTurn:takeTurn, resolvePending:resolvePending };
+})();
+if(typeof module!=='undefined'&&module.exports) module.exports=ECG_AI;
+
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   ECG UI — vanilla JS 全面再描画レンダラ
+   Phase③ (SES-432): ひとあかり/osakenpiro意匠・デッキビルダー・神話残篇
+   ═══════════════════════════════════════════════════════════════ */
+'use strict';
+(function(){
+  var SAVE_KEY='ecg_save_v220';
+  var DECKS_KEY='ecg_decks_v1';
+  var st=null;            // ゲーム状態
+  var ui={ screen:'title', factions:['Knight','Viking'], mode:'cpu', deckSel:[-1,-1],
+           pending:null, actMenu:null, cpuBusy:false, builder:null,
+           mythIx:Math.floor(Math.random()*4) };
+  var app=document.getElementById('app');
+  var SEC=null, CONSTS=null, DATA=null;
+
+  // 意匠: セクション色はUI層で正典palette準拠に上書き（正本JSONのsecColorsは温存・ECG-NOTES Phase③）
+  var SECC={ AGR:'var(--sec-agr)', IND:'var(--sec-ind)', MIL:'var(--sec-mil)', POL:'var(--sec-pol)', HERO:'var(--sec-hero)' };
+  var PHN={ waiting:'待機', main:'メイン', end:'精算', buy:'獲得', over:'終局' };
+
+  // 神話残篇 GR-001〜004（2026-06-06 user裁定「採用・軽め」/ 原典24話喪失→現存ヘッダーから新規執筆）
+  var MYTHS=[
+    {id:'GR-001', t:'パエトン',     q:'太陽の戦車を駆った少年は、手綱の重さを知らなかった。', s:'器を超えて溢れた富は、夜明けとともにこぼれ落ちる。──精算のとき、資源は上限まで戻る'},
+    {id:'GR-002', t:'ナルキッソス', q:'水面に映る己から、彼は目を離せなくなった。',           s:'人気とは、見つめすぎれば沈む鏡。──英雄はH(人気)の高さで姿を変える'},
+    {id:'GR-003', t:'アラクネ',     q:'神より見事に織った娘は、永遠に織り続ける蜘蛛になった。', s:'技巧の頂は、嫉妬の祭壇。──工業は富を生み、富は戦を呼ぶ'},
+    {id:'GR-004', t:'オルフェウス', q:'冥府の出口で、彼はついに振り返ってしまった。',         s:'眠った札は、朝には捨て札の国へ降りる。──循環を恐れず、振り返らない'}
+  ];
+
+  function boot(){
+    DATA=JSON.parse(document.getElementById('cards-data').textContent);
+    ECG.init(DATA);
+    CONSTS=ECG.constants();
+    SEC=ECG.SECTIONS;
+    render();
+  }
+
+  // ─── helpers ───
+  function esc(s){ return String(s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];}); }
+  function defOf(c){ return ECG.cardDef(c.id); }
+  function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(st)); }catch(e){} }
+  function loadSave(){ try{ var s=localStorage.getItem(SAVE_KEY); return s? JSON.parse(s):null; }catch(e){ return null; } }
+  function clearSave(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
+  function loadDecks(){ try{ return JSON.parse(localStorage.getItem(DECKS_KEY))||[]; }catch(e){ return []; } }
+  function saveDecks(a){ try{ localStorage.setItem(DECKS_KEY, JSON.stringify(a)); }catch(e){} }
+  function copyPicks(o){ var r={}; for(var k in o) r[k]=o[k]; return r; }
+  function pickTotal(p){ var n=0; for(var k in p) n+=p[k]; return n; }
+  function costStr(cost){
+    var keys=Object.keys(cost||{});
+    if(!keys.length) return '無料';
+    return keys.map(function(k){
+      var ic={food:'🌾',prod:'⚒️',civ:'📜',fame:'⭐',hp:'❤️'}[k]||k;
+      return ic+cost[k];
+    }).join(' ');
+  }
+  function isMyTurnHuman(){ return st && (st.mode!=='cpu' || st.current===0); }
+
+  // ─── カード描画 ───
+  function cardHTML(inst, zone, opts){
+    opts=opts||{};
+    var d=defOf(inst);
+    var cls=['card','sec-'+d.section];
+    if(inst.state==='sleep'&&zone==='board') cls.push('sleep');
+    if(opts.highlight) cls.push('target');
+    if(opts.actable) cls.push('actable');
+    if(opts.dim) cls.push('dim');
+    var unit=inst.unit? ('<span class="unit">⚔'+inst.unit.atk+'/🛡'+inst.unit.def+(inst.unit.armor?'<span class="armor">+'+inst.unit.armor+'</span>':'')+'</span>'):'';
+    var gar=ECG.garrisonValue(inst)? '<span class="gar">警'+ECG.garrisonValue(inst)+'</span>':'';
+    var tok=inst.tokens? '<span class="tok">🔶'+inst.tokens+'</span>':'';
+    var used=(zone==='board'&&inst.actionUsed)? '<span class="used">✓</span>':'';
+    var zzz=(zone==='board'&&inst.state==='sleep')? '<span class="zzz">💤</span>':'';
+    var eff0=(d.effects&&d.effects[0])? d.effects[0].text : '';
+    var cost = zone==='hand'? '<div class="cost">'+esc(costStr(d.playCost))+'</div>':'';
+    var leftCol = opts.highlight? 'var(--gold)' : SECC[d.section];
+    return '<div class="'+cls.join(' ')+'" data-uid="'+inst.uid+'" data-zone="'+zone+'" style="border-left-color:'+leftCol+'">' +
+      '<div class="chead"><span class="sec" style="color:'+SECC[d.section]+'">'+d.section+'</span>'+zzz+used+'</div>' +
+      '<div class="cname">'+esc(d.name)+'</div>' +
+      '<div class="cinfo">'+unit+gar+tok+'</div>' +
+      '<div class="ceff">'+esc(eff0)+'</div>' + cost +
+      '</div>';
+  }
+
+  function tooltipHTML(inst, ownerP){
+    var d=defOf(inst);
+    var h='<div class="tt-name" style="color:'+SECC[d.section]+'">'+esc(d.name)+'</div>';
+    h+='<div class="tt-meta">'+d.section+' / '+d.type+' / '+esc((d.tags||[]).join(','))+'</div>';
+    if(inst.unit) h+='<div>⚔'+inst.unit.atk+' / 🛡'+inst.unit.def+(inst.unit.armor?' / 重装'+inst.unit.armor:'')+'</div>';
+    h+='<div class="tt-cost">配置: '+esc(costStr(d.playCost))+'</div>';
+    var fame=ownerP? ownerP.resources.fame:-1;
+    (d.effects||[]).forEach(function(e){
+      var active='';
+      if(e.scaleRange){
+        var on = ownerP? (fame>=e.scaleRange[0]&&fame<=e.scaleRange[1]) : false;
+        active = on? ' tt-scale-on':' tt-scale-off';
+      }
+      h+='<div class="tt-eff'+active+'"><b>['+e.trigger+']</b> '+(e.cost?esc(costStr(e.cost))+' ':'')+esc(e.text)+'</div>';
+    });
+    return h;
+  }
+
+  // ─── 画面: タイトル ───
+  function renderTitle(){
+    var resumable=loadSave();
+    var decks=loadDecks();
+    var my=MYTHS[ui.mythIx%MYTHS.length];
+    var h='<div class="title-screen">';
+    h+='<div class="title-cap">EMPIRE CARD GAME — ECG v2.20</div>';
+    h+='<h1>帝国運用カードゲーム</h1>';
+    h+='<p class="sub">マナなし4資源 ／ 74カード ／ 起きている札だけが、働く</p>';
+    h+='<div class="myth"><div class="myth-q">'+esc(my.q)+'</div><div class="myth-s">'+esc(my.s)+'</div><div class="myth-src">神話残篇 '+my.id+'『'+my.t+'』</div></div>';
+    [0,1].forEach(function(pi){
+      h+='<div class="fac-row"><span class="fac-label">P'+(pi+1)+(pi===1&&ui.mode==='cpu'?'(CPU)':'')+'</span>';
+      ['Viking','Knight','Samurai'].forEach(function(f){
+        var sel=ui.factions[pi]===f;
+        var icon=f==='Viking'?'🪓':f==='Knight'?'🛡':'⚔';
+        h+='<button class="fac-btn'+(sel?' sel':'')+'" data-act="fac" data-pi="'+pi+'" data-f="'+f+'">'+icon+' '+f+'</button>';
+      });
+      if(decks.length){
+        var op='<option value="-1">📦 勢力プリセット</option>';
+        decks.forEach(function(d,ix){ op+='<option value="'+ix+'"'+(ui.deckSel[pi]===ix?' selected':'')+'>🛠 '+esc(d.name)+'（'+d.faction+'）</option>'; });
+        h+='<select class="deck-sel" data-act="deckSel" data-pi="'+pi+'">'+op+'</select>';
+      }
+      h+='</div>';
+    });
+    h+='<div class="fac-row"><span class="fac-label">モード</span>';
+    h+='<button class="fac-btn'+(ui.mode==='cpu'?' sel':'')+'" data-act="mode" data-m="cpu">🤖 vs CPU</button>';
+    h+='<button class="fac-btn'+(ui.mode==='hotseat'?' sel':'')+'" data-act="mode" data-m="hotseat">👥 ホットシート2P</button>';
+    h+='</div>';
+    h+='<div class="title-btns">';
+    h+='<button class="big-btn" data-act="start">⚔ ゲーム開始</button>';
+    if(resumable&&!resumable.winner) h+='<button class="big-btn ghost" data-act="resume">▶ 続きから</button>';
+    h+='<button class="big-btn ghost" data-act="openBuilder">🛠 デッキ構築</button>';
+    h+='</div>';
+    h+='<p class="note">初期デッキ10枚(農5・工5)＋自分専用サプライ20枚 ─ プリセットで即遊べる・構築で自分の帝国を組む<br>構築規則: 同名2枚まで ／ 農地・工房を1枚以上 ／ プール=Basic+自勢力</p>';
+    h+='</div>';
+    app.innerHTML=h;
+  }
+
+  // ─── 画面: デッキビルダー ───
+  function defaultBuilder(fac){
+    return { faction:fac, name:'', editIdx:-1, tab:'starting',
+             starting:copyPicks(DATA.defaultDecks.starting),
+             supply:copyPicks(ECG.FACTION_SUPPLY[fac]) };
+  }
+  function poolFor(kind,fac){
+    var all=ECG.allCards(), out=[];
+    for(var id in all){
+      var d=all[id], tag=(d.tags&&d.tags[0])||'';
+      if(tag==='Token') continue;
+      if(tag!=='Basic'&&tag!==fac) continue;
+      if(kind==='starting'&&d.section!=='AGR'&&d.section!=='IND') continue;
+      out.push(d);
+    }
+    var ord={AGR:0,IND:1,MIL:2,POL:3,HERO:4};
+    out.sort(function(a,b){
+      if(ord[a.section]!==ord[b.section]) return ord[a.section]-ord[b.section];
+      var ab=a.tags[0]==='Basic'?0:1, bb=b.tags[0]==='Basic'?0:1;
+      if(ab!==bb) return ab-bb;
+      return a.id<b.id? -1:1;
+    });
+    return out;
+  }
+  function validateBuilder(b){
+    var tot=0,agr=0,ind=0;
+    for(var id in b.starting){
+      var d=ECG.cardDef(id), n=b.starting[id];
+      if(!d||!n) continue;
+      tot+=n;
+      if(d.section==='AGR') agr+=n;
+      if(d.section==='IND') ind+=n;
+    }
+    var sup=pickTotal(b.supply);
+    var chips=[
+      {l:'初期 '+tot+'/10',    ok:tot===10},
+      {l:'農業 '+agr+'/5',     ok:agr===5},
+      {l:'工業 '+ind+'/5',     ok:ind===5},
+      {l:'農地≥1',             ok:(b.starting.BSC_FARM||0)>=1},
+      {l:'工房≥1',             ok:(b.starting.BSC_WORKSHOP||0)>=1},
+      {l:'サプライ '+sup+'/20', ok:sup===20}
+    ];
+    return { chips:chips, ok:chips.every(function(c){return c.ok;}) };
+  }
+  function bRowHTML(d,n,lim){
+    var hint='';
+    if(d.unit) hint='⚔'+d.unit.atk+'/🛡'+d.unit.def+(d.unit.armor?('+'+d.unit.armor):'');
+    var eff0=(d.effects&&d.effects[0])? d.effects[0].text:'';
+    if(eff0) hint+=(hint?' ─ ':'')+eff0;
+    if(d.type==='Operation') hint='✦作戦 '+hint;
+    return '<div class="b-row'+(n?'':' zero')+'" data-cid="'+d.id+'" style="border-left-color:'+SECC[d.section]+'">'+
+      '<span class="b-sec" style="color:'+SECC[d.section]+'">'+d.section+'</span>'+
+      '<span class="b-name">'+esc(d.name)+'</span>'+
+      '<span class="b-hint">'+esc(hint)+'</span>'+
+      '<span class="b-cost">'+esc(costStr(d.playCost))+'</span>'+
+      '<span class="b-step"><button class="mini-btn" data-act="bSub" data-id="'+d.id+'"'+(n?'':' disabled')+'>−</button>'+
+      '<span class="b-cnt'+(n?' has':'')+'">'+n+'</span>'+
+      '<button class="mini-btn" data-act="bAdd" data-id="'+d.id+'"'+(n>=lim?' disabled':'')+'>＋</button></span></div>';
+  }
+  function renderBuilder(){
+    var b=ui.builder;
+    var R=ECG.deckRules()||{};
+    var lim=R.sameNameLimit||2;
+    var v=validateBuilder(b);
+    var pool=poolFor(b.tab,b.faction);
+    var lst=b.tab==='starting'? b.starting:b.supply;
+    var h='<div class="bld">';
+    h+='<div class="bld-head"><h2>デッキ構築</h2>';
+    h+='<input id="bld-name" class="bld-name" data-act="bName" placeholder="デッキ名" value="'+esc(b.name)+'">';
+    ['Viking','Knight','Samurai'].forEach(function(f){
+      var icon=f==='Viking'?'🪓':f==='Knight'?'🛡':'⚔';
+      h+='<button class="fac-btn'+(b.faction===f?' sel':'')+'" data-act="bFac" data-f="'+f+'">'+icon+' '+f+'</button>';
+    });
+    h+='<button class="mini-btn" data-act="bBack">← タイトル</button></div>';
+    h+='<div class="bld-tabs">';
+    h+='<button class="bld-tab'+(b.tab==='starting'?' on':'')+'" data-act="bTab" data-t="starting">初期デッキ '+pickTotal(b.starting)+'/10</button>';
+    h+='<button class="bld-tab'+(b.tab==='supply'?' on':'')+'" data-act="bTab" data-t="supply">サプライ '+pickTotal(b.supply)+'/20</button></div>';
+    h+='<div class="bld-valid">';
+    v.chips.forEach(function(c){ h+='<span class="chip '+(c.ok?'ok':'ng')+'">'+(c.ok?'✓':'✗')+' '+esc(c.l)+'</span>'; });
+    h+='</div>';
+    h+='<div class="bld-pool">';
+    pool.forEach(function(d){ h+=bRowHTML(d, lst[d.id]||0, lim); });
+    h+='</div>';
+    h+='<div class="bld-foot">';
+    h+='<button class="big-btn" data-act="bSave"'+(v.ok?'':' disabled style="opacity:.45"')+'>💾 '+(b.editIdx>=0?'上書き保存':'デッキ保存')+'</button>';
+    h+='<button class="mini-btn" data-act="bReset">勢力プリセットに戻す</button>';
+    h+='<span class="note">勢力を変えるとプリセットに戻る ─ 保存後はタイトルのデッキ選択から使用</span></div>';
+    var dks=loadDecks();
+    if(dks.length){
+      h+='<div class="bld-decks"><h3>保存済みデッキ</h3>';
+      dks.forEach(function(d,ix){
+        h+='<div class="bld-deck-row"><b>'+esc(d.name)+'</b><span style="color:var(--dim)">（'+d.faction+'）</span>'+
+           '<button class="mini-btn" data-act="bEdit" data-ix="'+ix+'">✎ 編集</button>'+
+           '<button class="mini-btn" data-act="bDel" data-ix="'+ix+'">🗑 削除</button></div>';
+      });
+      h+='</div>';
+    }
+    h+='</div>';
+    app.innerHTML=h;
+  }
+  function syncBldName(){
+    var el=document.getElementById('bld-name');
+    if(el&&ui.builder) ui.builder.name=el.value;
+  }
+
+  // ─── 画面: ゲーム ───
+  function resourceBar(p, label, mine){
+    var caps=ECG.caps(p);
+    var h='<div class="resbar'+(mine?' mine':'')+'">';
+    h+='<b>'+esc(label)+'</b>';
+    h+='<span class="hp">❤️'+p.cityHP+'</span>';
+    ['food','prod','civ','fame'].forEach(function(r){
+      h+='<span>'+CONSTS.resIcons[r]+p.resources[r]+(r!=='fame'?'<small>/'+caps[r]+'</small>':'')+'</span>';
+    });
+    h+='<span class="counts">🃏'+p.deck.length+' 🗑'+p.discard.length+' 🚫'+p.exile.length+'</span>';
+    h+='</div>';
+    return h;
+  }
+
+  function boardHTML(p, pi, mine){
+    var isCur = st.current===pi;
+    var actsBySec={};
+    if(mine&&isCur&&st.phase==='main'&&isMyTurnHuman()){
+      SEC.forEach(function(sec){ actsBySec[sec]=ECG.listActs(st,sec); });
+    }
+    var h='<div class="board'+(mine?'':' opp')+'">';
+    SEC.forEach(function(sec){
+      var locked = st.actionSection!==null&&st.actionSection!==sec;
+      var actable = actsBySec[sec]&&actsBySec[sec].length&&!locked;
+      h+='<div class="sec-col'+(st.actionSection===sec&&isCur?' active-sec':'')+'">';
+      h+='<div class="sec-head" style="color:'+SECC[sec]+'">'+CONSTS.secNames[sec]+
+         ' <small>'+ECG.getWakeCount(p,sec)+'/'+ECG.getWakeLimit(p,sec)+'</small>'+(actable?' <span class="act-dot">●</span>':'')+'</div>';
+      p.board[sec].forEach(function(inst){
+        var hl = ui.pending && ui.pending.targets && ui.pending.targets.some(function(t){return t.uid===inst.uid;});
+        var canAct = mine&&actable&&!inst.actionUsed&&actsBySec[sec].some(function(a){return a.uid===inst.uid;});
+        h+=cardHTML(inst,'board',{highlight:hl, actable:canAct&&!ui.pending, dim:locked&&mine});
+      });
+      if(!p.board[sec].length) h+='<div class="empty">—</div>';
+      h+='</div>';
+    });
+    h+='</div>';
+    return h;
+  }
+
+  function handHTML(p){
+    var playable={};
+    if(st.phase==='main'&&isMyTurnHuman()&&!ui.pending&&!st.pending){
+      ECG.listPlayable(st).forEach(function(x){ playable[x.uid]=x; });
+    }
+    var h='<div class="hand-row">';
+    p.hand.forEach(function(inst){
+      var hl = ui.pending && ui.pending.targets && ui.pending.targets.some(function(t){return t.uid===inst.uid;});
+      var pl=playable[inst.uid];
+      h+=cardHTML(inst,'hand',{highlight:hl, actable:!!(pl&&pl.canPlay), dim:pl&&!pl.canPlay});
+    });
+    if(!p.hand.length) h+='<div class="empty">手札なし</div>';
+    h+='</div>';
+    return h;
+  }
+
+  function sidebarHTML(){
+    var p=st.players[st.current];
+    var h='<div class="sidebar">';
+    h+='<div class="phase-box">ターン'+st.turn+' ／ <b>'+(PHN[st.phase]||st.phase)+'</b>'+(st.actionSection?(' ／ Act:'+CONSTS.secNames[st.actionSection]):'')+'</div>';
+    if(st.phase==='waiting'){
+      if(st.mode==='cpu'&&st.current===1) h+='<div class="cpu-think">🤖 CPUのターン…</div>';
+      else h+='<button class="big-btn" data-act="startTurn">▶ P'+(st.current+1)+' ターン開始</button>';
+    }
+    if(st.phase==='main'&&isMyTurnHuman()){
+      h+='<div class="atkdef">⚔ ATK <b>'+p.turnATK+'</b> ／ 🛡 自DEF <b>'+ECG.calcDEF(p)+'</b> ／ 敵DEF <b>'+ECG.calcDEF(st.players[1-st.current])+'</b></div>';
+      h+='<button class="big-btn warn" data-act="endMain">⏭ メイン終了 → 精算</button>';
+    }
+    if(st.phase==='buy'&&isMyTurnHuman()){
+      var sup=st.supplies[st.current];
+      h+='<div class="supply"><div class="sup-head">🎴 サプライ（1枚無料獲得）'+(sup.acquiredThisTurn?' <b class="ok">✓獲得済</b>':'')+' <small>山'+sup.deck.length+'</small></div>';
+      sup.faceUp.forEach(function(c,i){
+        var d=defOf(c);
+        h+='<div class="sup-row" data-uid="'+c.uid+'">'+
+           '<span style="color:'+SECC[d.section]+'">'+d.section+'</span> <b>'+esc(d.name)+'</b>'+
+           '<button class="mini-btn" data-act="acq" data-i="'+i+'"'+(sup.acquiredThisTurn?' disabled':'')+'>獲得</button></div>';
+      });
+      if(sup.deck.length) h+='<button class="mini-btn blind" data-act="acqBlind"'+(sup.acquiredThisTurn?' disabled':'')+'>🎲 ブラインドドロー</button>';
+      h+='</div>';
+      h+='<button class="big-btn" data-act="endTurn">⏭ ターン終了</button>';
+    }
+    if(ui.pending){
+      h+='<div class="pending-box">🎯 '+esc(ui.pending.label)+'<br><small>ハイライトをクリック（候補'+ui.pending.targets.length+'）</small>'+
+         '<button class="mini-btn" data-act="cancelPending">キャンセル</button></div>';
+    }
+    if(ui.actMenu){
+      var acts=ECG.listActs(st,ui.actMenu.sec).filter(function(a){return a.uid===ui.actMenu.uid;});
+      h+='<div class="actmenu-box"><div class="sup-head">起動するアクション</div>';
+      acts.forEach(function(a,ix){
+        var boostUI='';
+        if(a.boost){
+          var b=ui.actMenu.boost||0;
+          boostUI=' <span class="boost">Boost:<button class="mini-btn" data-act="boostDec">−</button>'+b+'/'+a.boostMax+'<button class="mini-btn" data-act="boostInc">＋</button></span>';
+        }
+        h+='<div class="act-row"><button class="mini-btn go'+(a.canPay?'':' off')+'" data-act="execAct" data-ix="'+ix+'">'+
+           esc(a.text)+' ['+esc(costStr(a.cost))+']</button>'+boostUI+'</div>';
+      });
+      h+='<button class="mini-btn" data-act="closeActMenu">閉じる</button></div>';
+    }
+    h+='<div class="log" id="log">'+st.log.slice(-120).map(function(l){
+      var c=l.indexOf('★')===0?'win':(l.indexOf('──')===0?'turn':(l.indexOf('  ✗')===0?'err':''));
+      return '<div class="'+c+'">'+esc(l)+'</div>';
+    }).join('')+'</div>';
+    h+='<div class="foot-btns"><button class="mini-btn" data-act="newGame">🔄 新規ゲーム</button></div>';
+    h+='</div>';
+    return h;
+  }
+
+  function modalHTML(){
+    if(st.pending&&st.pending.type==='peek'){
+      var h='<div class="overlay"><div class="modal"><h3>📡 伝令: 1枚選んで手札へ</h3><div class="modal-cards">';
+      st.pending.cards.forEach(function(c){ h+=cardHTML(c,'peek',{actable:true}); });
+      h+='</div></div></div>';
+      return h;
+    }
+    if(st.pending&&st.pending.type==='wartime2'){
+      var t2s=ECG.getValidTargets(st,st.players[st.current],st.players[1-st.current],'allySleepMil');
+      var h2='<div class="overlay"><div class="modal"><h3>⚔ 戦時動員: WakeさせるMILを選択</h3><div class="modal-cards">';
+      t2s.forEach(function(c){ h2+=cardHTML(c,'wartime2',{actable:true}); });
+      h2+='</div><button class="mini-btn" data-act="skipWartime2">スキップ</button></div></div>';
+      return h2;
+    }
+    if(st.winner!==null){
+      var w=st.players[st.winner];
+      return '<div class="overlay"><div class="modal win-modal"><div class="trophy">🏆</div>'+
+        '<h2>P'+(st.winner+1)+' ('+esc(w.faction)+') の勝利！</h2>'+
+        '<p>ターン'+st.turn+' ／ 都市HP '+st.players[0].cityHP+' vs '+st.players[1].cityHP+'</p>'+
+        '<button class="big-btn" data-act="toTitle">タイトルへ</button></div></div>';
+    }
+    return '';
+  }
+
+  function renderGame(){
+    var me, opp, meIdx;
+    meIdx = st.mode==='cpu'? 0 : st.current;
+    me=st.players[meIdx]; opp=st.players[1-meIdx];
+    var h='<div class="game">';
+    h+='<div class="main-area">';
+    h+=resourceBar(opp,'P'+(2-meIdx)+' ('+opp.faction+')',false);
+    h+=boardHTML(opp,1-meIdx,false);
+    h+='<div class="divider"></div>';
+    h+=boardHTML(me,meIdx,true);
+    h+=resourceBar(me,'P'+(meIdx+1)+' ('+me.faction+')',true);
+    h+='<div class="hand-label">── 手札 ('+me.hand.length+'枚) ──</div>';
+    h+=handHTML(me);
+    h+='</div>';
+    h+=sidebarHTML();
+    h+='</div>';
+    h+=modalHTML();
+    app.innerHTML=h;
+    var logEl=document.getElementById('log');
+    if(logEl) logEl.scrollTop=logEl.scrollHeight;
+    if(st.mode==='cpu'&&st.phase==='waiting'&&st.current===1&&st.winner===null&&!ui.cpuBusy){
+      ui.cpuBusy=true;
+      setTimeout(function(){
+        ECG_AI.takeTurn(st);
+        ui.cpuBusy=false;
+        save(); render();
+      },350);
+    }
+  }
+
+  function render(){
+    if(ui.screen==='builder'&&ui.builder) renderBuilder();
+    else if(ui.screen==='title'||!st) renderTitle();
+    else renderGame();
+  }
+
+  // ─── クリック処理 ───
+  function findInstAnywhere(uid){
+    for(var pi=0;pi<2;pi++){
+      var p=st.players[pi];
+      for(var s=0;s<SEC.length;s++){
+        var arr=p.board[SEC[s]];
+        for(var i=0;i<arr.length;i++) if(arr[i].uid===uid) return {inst:arr[i],owner:p,zone:'board',sec:SEC[s],pi:pi};
+      }
+      for(var j=0;j<p.hand.length;j++) if(p.hand[j].uid===uid) return {inst:p.hand[j],owner:p,zone:'hand',handIdx:j,pi:pi};
+    }
+    if(st.pending&&st.pending.cards){
+      for(var k=0;k<st.pending.cards.length;k++) if(st.pending.cards[k].uid===uid) return {inst:st.pending.cards[k],zone:'peek'};
+    }
+    for(var si=0;si<2;si++){
+      var sup=st.supplies[si];
+      for(var f=0;f<sup.faceUp.length;f++) if(sup.faceUp[f].uid===uid) return {inst:sup.faceUp[f],owner:st.players[si],zone:'supply'};
+    }
+    return null;
+  }
+
+  function onCardClick(uid){
+    if(!isMyTurnHuman()&&st.mode==='cpu') return;
+    var hit=findInstAnywhere(uid);
+    if(!hit) return;
+    if(st.pending){
+      if(st.pending.type==='peek'&&hit.zone==='peek'){ ECG.finishPeek(st,uid); save(); render(); }
+      if(st.pending.type==='wartime2'){ ECG.finishWartime2(st,uid); save(); render(); }
+      return;
+    }
+    if(ui.pending){
+      var valid=ui.pending.targets.some(function(t){return t.uid===uid;});
+      if(!valid) return;
+      var pd=ui.pending; ui.pending=null;
+      var r;
+      if(pd.kind==='play') r=ECG.playCard(st,pd.handIdx,uid);
+      else r=ECG.doAct(st,pd.sec,pd.actUid,{effIdx:pd.effIdx,scaleKey:pd.scaleKey,boost:pd.boost,targetUid:uid});
+      save(); render();
+      return;
+    }
+    if(st.phase!=='main') return;
+    if(hit.zone==='hand'&&hit.pi===st.current){
+      var item=null;
+      ECG.listPlayable(st).forEach(function(x){ if(x.uid===uid) item=x; });
+      if(!item||!item.canPlay) return;
+      if(item.needsTarget){
+        ui.pending={kind:'play',handIdx:item.handIdx,targets:item.targets,label:defOf(hit.inst).name+': ターゲット選択'};
+        render(); return;
+      }
+      ECG.playCard(st,item.handIdx);
+      save(); render(); return;
+    }
+    if(hit.zone==='board'&&hit.pi===st.current){
+      var acts=ECG.listActs(st,hit.sec).filter(function(a){return a.uid===uid;});
+      if(!acts.length) return;
+      if(acts.length===1&&!acts[0].boost){ execActDirect(hit.sec,acts[0]); return; }
+      ui.actMenu={sec:hit.sec,uid:uid,boost:0};
+      render(); return;
+    }
+  }
+
+  function execActDirect(sec,a){
+    if(!a.canPay){ return; }
+    if(a.needsTarget){
+      ui.pending={kind:'act',sec:sec,actUid:a.uid,effIdx:a.effIdx,scaleKey:a.scaleKey,boost:ui.actMenu?ui.actMenu.boost:0,
+                  targets:a.targets,label:a.text};
+      ui.actMenu=null;
+      render(); return;
+    }
+    var r=ECG.doAct(st,sec,a.uid,{effIdx:a.effIdx,scaleKey:a.scaleKey,boost:ui.actMenu?ui.actMenu.boost:0});
+    ui.actMenu=null;
+    save(); render();
+  }
+
+  app.addEventListener('click',function(ev){
+    var btn=ev.target.closest('[data-act]');
+    if(btn){
+      var act=btn.getAttribute('data-act');
+      switch(act){
+        case 'fac': {
+          var pi=+btn.getAttribute('data-pi'), f=btn.getAttribute('data-f');
+          ui.factions[pi]=f;
+          if(ui.deckSel[pi]>=0){ var dk0=loadDecks()[ui.deckSel[pi]]; if(!dk0||dk0.faction!==f) ui.deckSel[pi]=-1; }
+          render(); return; }
+        case 'mode': ui.mode=btn.getAttribute('data-m'); render(); return;
+        case 'start': {
+          var dks=loadDecks();
+          var useDecks=ui.deckSel.map(function(ix){
+            var d=ix>=0? dks[ix]:null;
+            return d? {name:d.name, starting:d.starting, supply:d.supply}:null;
+          });
+          st=ECG.newGame({factions:ui.factions.slice(),mode:ui.mode,decks:useDecks});
+          ui.screen='game'; ui.pending=null; ui.actMenu=null;
+          save(); render(); return; }
+        case 'resume': {
+          var sv=loadSave();
+          if(sv){ st=sv; ui.screen='game'; ui.pending=null; ui.actMenu=null; render(); }
+          return; }
+        case 'startTurn': ECG.startTurn(st); save(); render(); return;
+        case 'endMain': ECG.endMain(st); save(); render(); return;
+        case 'endTurn': ECG.endTurn(st); save(); render(); return;
+        case 'acq': ECG.acquire(st,{type:'faceUp',index:+btn.getAttribute('data-i')}); save(); render(); return;
+        case 'acqBlind': ECG.acquire(st,{type:'blind'}); save(); render(); return;
+        case 'cancelPending': ui.pending=null; render(); return;
+        case 'closeActMenu': ui.actMenu=null; render(); return;
+        case 'boostInc': if(ui.actMenu){ ui.actMenu.boost=(ui.actMenu.boost||0)+1; clampBoost(); render(); } return;
+        case 'boostDec': if(ui.actMenu){ ui.actMenu.boost=Math.max(0,(ui.actMenu.boost||0)-1); render(); } return;
+        case 'execAct':
+          if(ui.actMenu){
+            var acts=ECG.listActs(st,ui.actMenu.sec).filter(function(a){return a.uid===ui.actMenu.uid;});
+            var a=acts[+btn.getAttribute('data-ix')];
+            if(a) execActDirect(ui.actMenu.sec,a);
+          }
+          return;
+        case 'skipWartime2': ECG.finishWartime2(st,null); save(); render(); return;
+        case 'newGame': if(confirm('進行中のゲームを破棄して新規開始する？')){ clearSave(); st=null; ui.screen='title'; render(); } return;
+        case 'toTitle': clearSave(); st=null; ui.screen='title'; ui.mythIx=Math.floor(Math.random()*MYTHS.length); render(); return;
+        // ── デッキビルダー ──
+        case 'openBuilder': ui.builder=defaultBuilder(ui.factions[0]); ui.screen='builder'; render(); return;
+        case 'bBack': syncBldName(); ui.screen='title'; render(); return;
+        case 'bTab': syncBldName(); ui.builder.tab=btn.getAttribute('data-t'); render(); return;
+        case 'bFac': {
+          syncBldName();
+          var nf=btn.getAttribute('data-f');
+          if(ui.builder.faction!==nf){
+            var nm=ui.builder.name, ei=ui.builder.editIdx;
+            ui.builder=defaultBuilder(nf); ui.builder.name=nm; ui.builder.editIdx=ei;
+          }
+          render(); return; }
+        case 'bAdd': case 'bSub': {
+          syncBldName();
+          var cid=btn.getAttribute('data-id');
+          var lst=ui.builder.tab==='starting'? ui.builder.starting:ui.builder.supply;
+          var lim=(ECG.deckRules()&&ECG.deckRules().sameNameLimit)||2;
+          var n0=lst[cid]||0;
+          if(act==='bAdd'&&n0<lim) lst[cid]=n0+1;
+          if(act==='bSub'&&n0>0){ lst[cid]=n0-1; if(!lst[cid]) delete lst[cid]; }
+          render(); return; }
+        case 'bReset': {
+          syncBldName();
+          var nm2=ui.builder.name, ei2=ui.builder.editIdx, f2=ui.builder.faction;
+          ui.builder=defaultBuilder(f2); ui.builder.name=nm2; ui.builder.editIdx=ei2;
+          render(); return; }
+        case 'bSave': {
+          syncBldName();
+          var v=validateBuilder(ui.builder);
+          if(!v.ok) return;
+          var dks2=loadDecks();
+          var nm3=ui.builder.name||('マイデッキ'+(dks2.length+1));
+          var rec={name:nm3, faction:ui.builder.faction,
+                   starting:copyPicks(ui.builder.starting), supply:copyPicks(ui.builder.supply)};
+          if(ui.builder.editIdx>=0&&dks2[ui.builder.editIdx]) dks2[ui.builder.editIdx]=rec;
+          else dks2.push(rec);
+          saveDecks(dks2);
+          ui.screen='title'; render(); return; }
+        case 'bEdit': {
+          var ix3=+btn.getAttribute('data-ix'); var dk3=loadDecks()[ix3];
+          if(!dk3) return;
+          ui.builder={faction:dk3.faction, name:dk3.name, editIdx:ix3, tab:'starting',
+                      starting:copyPicks(dk3.starting), supply:copyPicks(dk3.supply)};
+          render(); return; }
+        case 'bDel': {
+          var ix4=+btn.getAttribute('data-ix');
+          if(!confirm('このデッキを削除する？')) return;
+          var dks4=loadDecks(); dks4.splice(ix4,1); saveDecks(dks4);
+          ui.deckSel=ui.deckSel.map(function(vv){ return vv===ix4? -1 : (vv>ix4? vv-1:vv); });
+          render(); return; }
+      }
+    }
+    var cardEl=ev.target.closest('.card');
+    if(cardEl&&st&&ui.screen!=='builder'){ onCardClick(cardEl.getAttribute('data-uid')); }
+  });
+
+  app.addEventListener('change',function(ev){
+    var el=ev.target.closest('[data-act]');
+    if(!el) return;
+    var act=el.getAttribute('data-act');
+    if(act==='deckSel'){
+      var pi=+el.getAttribute('data-pi'), ix=parseInt(el.value,10);
+      var dks=loadDecks();
+      if(ix>=0&&dks[ix]){ ui.deckSel[pi]=ix; ui.factions[pi]=dks[ix].faction; }
+      else ui.deckSel[pi]=-1;
+      render(); return;
+    }
+    if(act==='bName'&&ui.builder){ ui.builder.name=el.value; return; }
+  });
+
+  function clampBoost(){
+    if(!ui.actMenu) return;
+    var acts=ECG.listActs(st,ui.actMenu.sec).filter(function(a){return a.uid===ui.actMenu.uid&&a.boost;});
+    if(acts.length) ui.actMenu.boost=Math.min(ui.actMenu.boost,acts[0].boostMax);
+  }
+
+  // ─── ツールチップ ───
+  var tt=document.createElement('div');
+  tt.className='tooltip'; tt.style.display='none';
+  document.body.appendChild(tt);
+  app.addEventListener('mouseover',function(ev){
+    var rowEl=ev.target.closest&&ev.target.closest('[data-cid]');
+    if(rowEl){
+      var d=ECG.cardDef(rowEl.getAttribute('data-cid'));
+      if(d){
+        var pseudo={id:d.id, unit:d.unit?{atk:d.unit.atk,def:d.unit.def,armor:d.unit.armor||0}:null, tokens:0};
+        tt.innerHTML=tooltipHTML(pseudo,null);
+        tt.style.display='block'; return;
+      }
+    }
+    var cardEl=ev.target.closest('.card');
+    if(!cardEl||!st){ if(!rowEl) tt.style.display='none'; return; }
+    var hit=findInstAnywhere(cardEl.getAttribute('data-uid'));
+    if(!hit){ tt.style.display='none'; return; }
+    tt.innerHTML=tooltipHTML(hit.inst,hit.owner||null);
+    tt.style.display='block';
+  });
+  app.addEventListener('mouseout',function(ev){
+    if(ev.target.closest&&(ev.target.closest('.card')||ev.target.closest('[data-cid]'))) tt.style.display='none';
+  });
+
+  boot();
+})();
+
+</script>
+</body>
+</html>
