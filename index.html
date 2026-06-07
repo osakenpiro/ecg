@@ -141,6 +141,10 @@ select{font-family:inherit;}
 .win-modal .trophy{font-size:50px;}
 .win-modal h2{font-family:var(--serif); color:var(--gold); margin:8px 0; font-weight:400; letter-spacing:.06em;}
 .win-modal p{color:var(--fg-2); margin-bottom:14px;}
+/* γ-8: 勝利画面の残篇拾遺 */
+.win-myth{margin:0 auto 16px; padding:11px 16px;}
+.win-myth .myth-q{font-size:13px; color:var(--gold);}
+.win-myth .myth-src{margin-top:7px;}
 
 /* ── ツールチップ ── */
 .tooltip{position:fixed; top:10px; left:10px; z-index:2000; background:var(--surface-hi); border:1px solid var(--line-hover); border-radius:10px; padding:12px; max-width:270px; font-size:11px; box-shadow:0 4px 24px rgba(0,0,0,.65); pointer-events:none;}
@@ -249,6 +253,13 @@ select{font-family:inherit;}
   .sidebar{max-height:none; border-left:none; border-top:1px solid var(--line);}
   .bld-pool{grid-template-columns:1fr;}
   .title-screen h1{font-size:27px;}
+}
+/* γ-8: モバイル微調整(γ-6持ち越し分) — 盤面5列は潰さず横スワイプ・モーダル幅・iOSズーム抑止 */
+@media (max-width:720px){
+  .board{grid-template-columns:repeat(5,minmax(96px,1fr)); overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  .modal{max-width:92vw; padding:16px;}
+  .bld-name{font-size:16px;}
+  .hand-row .card{min-width:96px;}
 }
 </style>
 <meta property="og:title" content="帝国運用カードゲーム ECG">
@@ -2736,7 +2747,11 @@ var ECG = (function(){
       st.supplies.push(initSupply(st,sup));
       if(dk) log(st,'P'+(i+1)+': カスタムデッキ'+(dk.name?'「'+dk.name+'」':'')+'を使用');
     }
+    // γ-8(SES-458): 後手補正 — 後手(P2)は初期F+1。user裁定2026-06-07
+    // (sim実測: P1率58.2%→55.4%。正本JSON不変・両モード適用)
+    st.players[1].resources.food+=1;
     log(st,'ゲーム開始！ 先攻: P1('+opts.factions[0]+')'+(st.mode==='cpu'?' / P2=CPU':' / ホットシート2P'));
+    log(st,'  後手補正: P2 食料+1');
     return st;
   }
 
@@ -3354,9 +3369,10 @@ var ECG_AI = (function(){
     return s;
   }
 
-  function aiMainPhase(st){
-    var p=st.players[st.current], enemy=st.players[1-st.current];
-    // ── プレイループ（貪欲・最大8枚） ──
+  // γ-8(SES-458): プレイループを関数化。Act後の第2走で「Act(一喝/威圧)→Play(粛清)」の
+  // 2手連携を可能にする。エンジンはMain中のAct後Playを許す(phase==='main'ガードのみ)が、
+  // 従来AIは「プレイ全部→Act全部」固定順でこの連携を構造的に打てなかった。
+  function playGreedy(st,p,enemy){
     var guard=0;
     while(guard++<10){
       var plays=ECG.listPlayable(st).filter(function(x){ return x.canPlay; });
@@ -3377,7 +3393,18 @@ var ECG_AI = (function(){
       if(r!==true) break;
       resolvePending(st);
     }
+  }
+
+  function aiMainPhase(st){
+    var p=st.players[st.current], enemy=st.players[1-st.current];
+    playGreedy(st,p,enemy);
     // ── アクションセクション選択 ──
+    // γ-8: 手札にenemySleep対象Play(粛清)を持つか=sleepTarget Actとの2手連携の事前認識
+    var comboSleepPlay=false;
+    for(var ci=0;ci<p.hand.length&&!comboSleepPlay;ci++){
+      var ces=(ECG.cardDef(p.hand[ci].id).effects||[]);
+      for(var cj=0;cj<ces.length;cj++) if(ces[cj].trigger==='Play'&&ces[cj].needsTarget==='enemySleep') comboSleepPlay=true;
+    }
     var bestSec=null, bestVal=0;
     ECG.SECTIONS.forEach(function(sec){
       var acts=ECG.listActs(st,sec).filter(function(a){return a.canPay;});
@@ -3394,7 +3421,8 @@ var ECG_AI = (function(){
         if(op==='atk'||op==='atkSelfDamage'||op==='atkPerLogisticsAlly') val+=4;
         else if(op==='tokenRelease'&&inst&&inst.tokens>=2) val+=5;
         else if(op==='res') val+=3;
-        else if(op==='sleepTarget'||op==='exileTarget') val+=4;
+        else if(op==='exileTarget') val+=4;
+        else if(op==='sleepTarget') val+=4+(comboSleepPlay? 8:0); // γ-8: 一喝→粛清コンボ価値
         else if(op==='wakeTarget'||op==='wakeAllAllies'||op==='reawaken') val+=3;
         else if(op==='duel'||op==='siegeDamage') val+=4;
         else if(op==='heal'&&p.cityHP<=7) val+=4;
@@ -3429,6 +3457,8 @@ var ECG_AI = (function(){
         if(r2!==true) break;
         resolvePending(st);
       }
+      // γ-8: Act後の第2プレイ走 — 一喝/威圧でSleepさせた敵へ粛清等の追放Playが解禁されている
+      playGreedy(st,p,enemy);
     }
   }
 
@@ -3522,12 +3552,26 @@ if(typeof module!=='undefined'&&module.exports) module.exports=ECG_AI;
   var PHN={ waiting:'待機', main:'メイン', end:'精算', buy:'獲得', over:'終局' };
 
   // 神話残篇 GR-001〜004（2026-06-06 user裁定「採用・軽め」/ 原典24話喪失→現存ヘッダーから新規執筆）
+  // γ-8(SES-458): w=勝利画面用の拾遺（対局の終わり方に応じてpickWinMythが選ぶ）
   var MYTHS=[
-    {id:'GR-001', t:'パエトン',     q:'太陽の戦車を駆った少年は、手綱の重さを知らなかった。', s:'器を超えて溢れた富は、夜明けとともにこぼれ落ちる。──精算のとき、資源は上限まで戻る'},
-    {id:'GR-002', t:'ナルキッソス', q:'水面に映る己から、彼は目を離せなくなった。',           s:'人気とは、見つめすぎれば沈む鏡。──英雄はH(人気)の高さで姿を変える'},
-    {id:'GR-003', t:'アラクネ',     q:'神より見事に織った娘は、永遠に織り続ける蜘蛛になった。', s:'技巧の頂は、嫉妬の祭壇。──工業は富を生み、富は戦を呼ぶ'},
-    {id:'GR-004', t:'オルフェウス', q:'冥府の出口で、彼はついに振り返ってしまった。',         s:'眠った札は、朝には捨て札の国へ降りる。──循環を恐れず、振り返らない'}
+    {id:'GR-001', t:'パエトン',     q:'太陽の戦車を駆った少年は、手綱の重さを知らなかった。', s:'器を超えて溢れた富は、夜明けとともにこぼれ落ちる。──精算のとき、資源は上限まで戻る',
+     w:'駆け抜けた者の手に、手綱の跡だけが残る。溢れた富も、焦げた野も、夜明けの取り分。'},
+    {id:'GR-002', t:'ナルキッソス', q:'水面に映る己から、彼は目を離せなくなった。',           s:'人気とは、見つめすぎれば沈む鏡。──英雄はH(人気)の高さで姿を変える',
+     w:'水鏡は割れない。映る顔が、入れ替わるだけ。人気の頂で、あなたは誰の顔をしていたか。'},
+    {id:'GR-003', t:'アラクネ',     q:'神より見事に織った娘は、永遠に織り続ける蜘蛛になった。', s:'技巧の頂は、嫉妬の祭壇。──工業は富を生み、富は戦を呼ぶ',
+     w:'織り上がった布の裏には、解いた糸の数だけ結び目がある。工房の煙は、勝者の旗より長く棚引く。'},
+    {id:'GR-004', t:'オルフェウス', q:'冥府の出口で、彼はついに振り返ってしまった。',         s:'眠った札は、朝には捨て札の国へ降りる。──循環を恐れず、振り返らない',
+     w:'振り返らずに歩き切った者だけが、朝の門をくぐる。眠った札たちも、次の朝には目を覚ます。'}
   ];
+
+  // γ-8: 勝ち方に応じた残篇選定 — 長期戦=循環(GR-004)/人気の頂=鏡(GR-002)/工業都市=機(GR-003)/速攻=戦車(GR-001)
+  function pickWinMyth(st){
+    var w=st.players[st.winner];
+    if(st.turn>=20) return MYTHS[3];
+    if(w.resources.fame>=6 || (w.board.HERO.length&&w.resources.fame>=4)) return MYTHS[1];
+    if(w.board.IND.length>=3) return MYTHS[2];
+    return MYTHS[0];
+  }
 
   function boot(){
     DATA=JSON.parse(document.getElementById('cards-data').textContent);
@@ -3868,9 +3912,12 @@ if(typeof module!=='undefined'&&module.exports) module.exports=ECG_AI;
     }
     if(st.winner!==null){
       var w=st.players[st.winner];
+      var wm=pickWinMyth(st); // γ-8: 勝ち方で残篇が変わる
       return '<div class="overlay"><div class="modal win-modal"><div class="trophy">🏆</div>'+
         '<h2>P'+(st.winner+1)+' ('+esc(w.faction)+') の勝利！</h2>'+
         '<p>ターン'+st.turn+' ／ 都市HP '+st.players[0].cityHP+' vs '+st.players[1].cityHP+'</p>'+
+        '<div class="myth win-myth"><div class="myth-q">'+esc(wm.w)+'</div>'+
+        '<div class="myth-src">神話残篇 拾遺 '+wm.id+'『'+esc(wm.t)+'』</div></div>'+
         '<button class="big-btn" data-act="toTitle">タイトルへ</button></div></div>';
     }
     return '';
