@@ -2501,19 +2501,23 @@ var ECG = (function(){
   }
 
   // ─── 勢力別デフォルトサプライ（判断: 2026-06-06 user裁定。構築UIは③） ───
+  // γ-7調整(SES-452): 実プレイ観察+sim計測に基づく既定サプライ改訂。正本JSONは不変・engine注入のみ
+  //  Knight: 亀ミラー膠着(KvK 膠着37-57%実測)対策に除去2枚(攻城槌/強制停戦)を注入、-国会1 -議会招集1
+  //  Samurai: 恒常3位(66-79勝 vs 84-94)対策に主力除去を増量(忍2/夜討ち2)、-杭柵 -マニフェスト(汎用フィラー)
   var FACTION_SUPPLY = {
     Viking: { VIK_RAIDER:2, VIK_SCAVENGER:1, VIK_BERSERK:1, VIK_LONGSHIP:2, VIK_LOOT:1,
       VIK_DIST:1, VIK_FEAST:1, VIK_OP_RAID:2, VIK_OP_SCORCH:1,
       VIK_HERO_LOW:1, VIK_HERO_HIGH:1, VIK_HERO_ALT:1,
       BSC_INFANTRY:1, BSC_PALISADE:1, BSC_DIET:1, BSC_SILO:1, BSC_STR_GRANARY:1 },
-    Knight: { KNT_SQUIRE:2, KNT_GUARD:2, KNT_HEAVYCAV:1, KNT_ELITE:1, KNT_TOWER:1,
-      KNT_SMITHY:1, KNT_CATHEDRAL:1, KNT_OP_DEPLOY:1,
+    Knight: { KNT_SQUIRE:2, KNT_GUARD:1, KNT_HEAVYCAV:1, KNT_ELITE:1, KNT_TOWER:1,
+      KNT_SMITHY:1, KNT_OP_DEPLOY:1,
       KNT_HERO_LOW:1, KNT_HERO_HIGH:1, KNT_HERO_ALT:1,
-      BSC_MOAT:1, BSC_WALL:1, BSC_FARM:1, BSC_DIET:2, BSC_CONVENE:1, BSC_STR_COURT:1 },
-    Samurai: { SAM_ASHIGARU:2, SAM_NINJA:1, SAM_WARLORD:1, SAM_CHECKPOINT:1, SAM_FLOODGATE:1,
-      SAM_BEACON:1, SAM_INTIMIDATE:1, SAM_OP_NIGHT:1, SAM_OP_FIRE:1, TOK_ONENIGHT:1,
-      SAM_HERO_LOW:1, SAM_HERO_HIGH:1, SAM_HERO_ALT:1,
-      BSC_INFANTRY:1, BSC_PALISADE:1, BSC_DIET:1, BSC_SPEECH:1, BSC_MANIFESTO:1, BSC_CAVALRY:1 }
+      BSC_MOAT:1, BSC_WALL:1, BSC_FARM:1, BSC_DIET:2, BSC_STR_COURT:1,
+      MIL_SIEGE:1, MIL_CEASEFIRE:1, BSC_PURGE:1 },
+    Samurai: { SAM_ASHIGARU:2, SAM_NINJA:2, SAM_WARLORD:2, SAM_CHECKPOINT:1, SAM_FLOODGATE:1,
+      SAM_INTIMIDATE:1, SAM_OP_NIGHT:2, TOK_ONENIGHT:1,
+      SAM_HERO_LOW:1, SAM_HERO_ALT:1, BSC_PALISADE:1,
+      BSC_CAVALRY:1, BSC_DIET:2, BSC_PURGE:2 }
   };
 
   // ─── Scale実装テーブル（判断#2: H閾値Tier・全Tier実装） ───
@@ -3332,6 +3336,21 @@ var ECG_AI = (function(){
     if(hasGarrison) s += (p.cityHP<=7? 22:10);
     if(d.unit){ s += 12 + d.unit.atk*2; if(ECG.getWakeCount(p,'MIL')>=3) s-=8; if(st.turn>12) s+=8; }
     if(d.section==='HERO'){ s += (p.board.HERO.length===0? 16:2); }
+    // γ-7(SES-452): AI盲点解消 — Act専用ユーティリティ/タックス/Start系に基礎点。
+    // 従来はPas資源/上限/警備/ユニット/HERO以外が0点=閾値未満で永久に手札で腐っていた
+    // (兵糧攻め/水攻め/威圧/一喝/狼煙台/豊作政策など)。自傷リスク系opはAIには持たせない。
+    var SELF_RISK={slotMod:1,wartimeSwap:1};
+    var hasTax=false,hasUtil=false,hasStart=false;
+    for(var i2=0;i2<es.length;i2++){
+      if(es[i2].hunger||es[i2].riot) hasTax=true;
+      if(es[i2].trigger==='Act'&&es[i2].op&&!SELF_RISK[es[i2].op]) hasUtil=true;
+      if(es[i2].trigger==='Start'&&es[i2].op) hasStart=true;
+    }
+    if(hasTax) s+=11;
+    if(!hasPasRes&&!d.unit&&d.section!=='HERO'&&!hasGarrison){
+      if(hasUtil) s+=8;
+      else if(hasStart) s+=6;
+    }
     return s;
   }
 
@@ -3450,6 +3469,11 @@ var ECG_AI = (function(){
       if(ECG.garrisonValue(sup.faceUp[i])>0) s += (p.cityHP<=7? 8:4);
       if(d.section==='HERO') s += (p.board.HERO.length===0? 6:1);
       if(d.type==='Operation') s += 3 + (st.turn>15? 4:0);
+      // γ-7(SES-452): タックス/Actユーティリティも買い候補に(死に札がfaceUpを塞ぐのを防ぐ)
+      for(var j2=0;j2<es.length;j2++){
+        if(es[j2].hunger||es[j2].riot){ s+=5; break; }
+        if(es[j2].trigger==='Act'&&es[j2].op&&!hasPasRes&&!d.unit){ s+=3; break; }
+      }
       if(s>bestS){ bestS=s; best=i; }
     }
     // 20%でブラインド（多様性）
