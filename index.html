@@ -182,6 +182,68 @@ select{font-family:inherit;}
 .bld-decks h3{font-size:12px; color:var(--fg-3); letter-spacing:.18em; margin-bottom:6px;}
 .bld-deck-row{display:flex; gap:8px; align-items:center; padding:5px 0; color:var(--fg-2); font-size:12px;}
 
+/* ═══ γ-6 リッチ化 (SES-443続走・リデ「やっぱ気持ちよくないと、意味ないじゃん」) ═══ */
+/* ── タイトル背景 = og「盤上の一灯」転用(資産再利用・無ければ静かに退化) ── */
+.title-screen{position:relative; overflow:hidden;}
+.title-screen::before{content:''; position:absolute; inset:0; z-index:-1;
+  background:url('og.jpg') center 36%/cover no-repeat;
+  opacity:.17; filter:saturate(.8);
+  -webkit-mask-image:radial-gradient(74% 66% at 50% 42%, #000 28%, transparent 78%);
+  mask-image:radial-gradient(74% 66% at 50% 42%, #000 28%, transparent 78%);}
+/* ── 卓上感: 軍議の卓 ── */
+.main-area{background:
+  radial-gradient(120% 80% at 50% 0%, rgba(212,168,83,.05), transparent 58%),
+  radial-gradient(100% 130% at 50% 108%, rgba(6,6,10,.85), transparent 72%);}
+.sec-col{box-shadow:inset 0 1px 9px rgba(0,0,0,.5); background:rgba(6,6,10,.55);}
+.card{box-shadow:0 1px 3px rgba(0,0,0,.55);}
+.card:active{transform:translateY(1px);}
+.resbar{box-shadow:0 1px 0 rgba(232,224,208,.04) inset, 0 2px 6px rgba(0,0,0,.35);}
+/* ── カード面: 区画紋章ウォーターマーク+コストピル+HERO箔 ── */
+.card::after{position:absolute; right:5px; bottom:2px; font-size:17px; opacity:.13; pointer-events:none; line-height:1;}
+.card.sec-AGR::after{content:'🌾';}
+.card.sec-IND::after{content:'⚙';}
+.card.sec-MIL::after{content:'⚔';}
+.card.sec-POL::after{content:'🏛';}
+.card.sec-HERO::after{content:'👑'; opacity:.22;}
+.card.sec-HERO .cname{font-family:var(--serif); color:var(--gold); letter-spacing:.05em; font-size:13px;}
+.cost{display:inline-block; background:rgba(6,6,10,.5); border:1px solid var(--line); border-radius:999px; padding:1px 8px;}
+.cinfo .unit{background:rgba(176,138,138,.13); border:1px solid rgba(176,138,138,.32); border-radius:5px; padding:0 5px;}
+.cinfo .gar{background:rgba(138,154,168,.13); border:1px solid rgba(138,154,168,.32); border-radius:5px; padding:0 5px;}
+.board .sec-col:nth-child(1) .sec-head::before{content:'🌾 '; opacity:.75;}
+.board .sec-col:nth-child(2) .sec-head::before{content:'⚙ '; opacity:.75;}
+.board .sec-col:nth-child(3) .sec-head::before{content:'⚔ '; opacity:.75;}
+.board .sec-col:nth-child(4) .sec-head::before{content:'🏛 '; opacity:.75;}
+.board .sec-col:nth-child(5) .sec-head::before{content:'👑 '; opacity:.75;}
+/* ── マイクロアニメ ── */
+.anim-place{animation:cardIn .42s cubic-bezier(.2,.8,.3,1);}
+@keyframes cardIn{0%{transform:translateY(10px) scale(.92); opacity:0;}100%{transform:none; opacity:1;}}
+.anim-hit{animation:hitShake .55s;}
+@keyframes hitShake{20%{transform:translateX(-4px); border-color:var(--rust); box-shadow:0 0 14px rgba(176,138,138,.5);}60%{transform:translateX(3px);}}
+.res-up{animation:resGlow .8s;}
+@keyframes resGlow{30%{box-shadow:0 0 14px var(--gold-glow); border-color:var(--gold-edge);}}
+.turn-banner{position:fixed; left:50%; top:33%; transform:translateX(-50%); z-index:1400; pointer-events:none; white-space:nowrap;
+  font-family:var(--serif); font-size:30px; color:var(--gold); letter-spacing:.3em; text-shadow:0 0 28px var(--gold-glow);
+  animation:bannerFade 1.3s ease forwards;}
+@keyframes bannerFade{0%{opacity:0; transform:translate(-50%,9px);}18%{opacity:1;}68%{opacity:1;}100%{opacity:0; transform:translate(-50%,-7px);}}
+/* ── 軍師チュートリアル ── */
+.tut-guide{position:fixed; left:50%; transform:translateX(-50%); bottom:16px; z-index:1500; max-width:640px; width:calc(100% - 28px);
+  background:linear-gradient(168deg, rgba(28,26,35,.97), rgba(21,20,26,.97)); border:1px solid var(--gold-edge); border-radius:12px;
+  padding:12px 16px 10px; box-shadow:0 8px 34px rgba(0,0,0,.65);}
+.tut-guide.nudge{animation:tutShake .32s;}
+@keyframes tutShake{25%{transform:translateX(calc(-50% - 7px));}75%{transform:translateX(calc(-50% + 7px));}}
+.tut-who{font-family:var(--serif); color:var(--gold); font-size:11px; letter-spacing:.34em; margin-bottom:4px; opacity:.9;}
+.tut-text{font-size:13px; line-height:1.85; color:var(--fg-1);}
+.tut-text b{color:var(--gold); font-weight:600;}
+.tut-hint{margin-top:6px; font-size:11.5px; color:var(--parchment);}
+.tut-foot{display:flex; gap:8px; margin-top:8px; align-items:center;}
+.tut-step{color:var(--dim); font-size:10px; margin-left:auto; letter-spacing:.12em;}
+.tut-spot{outline:2px solid var(--gold); outline-offset:2px; border-radius:9px; animation:tutPulse 1.5s infinite;}
+@keyframes tutPulse{0%,100%{outline-color:var(--gold);}50%{outline-color:rgba(212,168,83,.22);}}
+/* ── 用語の帳 ── */
+.gloss-list{text-align:left; max-height:58vh; overflow:auto; margin:8px 0 12px; padding-right:6px;}
+.gloss-list dt{color:var(--gold); font-weight:bold; margin-top:9px; font-size:12.5px;}
+.gloss-list dd{color:var(--fg-2); margin-left:0; font-size:12px; line-height:1.7;}
+
 @media (max-width:900px){
   .game{grid-template-columns:1fr;}
   .sidebar{max-height:none; border-left:none; border-top:1px solid var(--line);}
@@ -3544,9 +3606,11 @@ if(typeof module!=='undefined'&&module.exports) module.exports=ECG_AI;
     h+='</div>';
     h+='<div class="title-btns">';
     h+='<button class="big-btn" data-act="start">⚔ ゲーム開始</button>';
+    h+='<button class="big-btn ghost" data-act="tutStart">📜 はじめての帝国</button>';
     if(resumable&&!resumable.winner) h+='<button class="big-btn ghost" data-act="resume">▶ 続きから</button>';
     h+='<button class="big-btn ghost" data-act="openBuilder">🛠 デッキ構築</button>';
     h+='</div>';
+    h+='<button class="mini-btn" data-act="glossary">📖 用語の帳</button>';
     h+='<p class="note">初期デッキ10枚(農5・工5)＋自分専用サプライ20枚 ─ プリセットで即遊べる・構築で自分の帝国を組む<br>構築規則: 同名2枚まで ／ 農地・工房を1枚以上 ／ プール=Basic+自勢力</p>';
     h+='</div>';
     app.innerHTML=h;
@@ -3759,7 +3823,7 @@ if(typeof module!=='undefined'&&module.exports) module.exports=ECG_AI;
       var c=l.indexOf('★')===0?'win':(l.indexOf('──')===0?'turn':(l.indexOf('  ✗')===0?'err':''));
       return '<div class="'+c+'">'+esc(l)+'</div>';
     }).join('')+'</div>';
-    h+='<div class="foot-btns"><button class="mini-btn" data-act="newGame">🔄 新規ゲーム</button></div>';
+    h+='<div class="foot-btns"><button class="mini-btn" data-act="newGame">🔄 新規ゲーム</button><button class="mini-btn" data-act="glossary">📖 用語</button></div>';
     h+='</div>';
     return h;
   }
@@ -4039,6 +4103,226 @@ if(typeof module!=='undefined'&&module.exports) module.exports=ECG_AI;
   });
   app.addEventListener('mouseout',function(ev){
     if(ev.target.closest&&(ev.target.closest('.card')||ev.target.closest('[data-cid]'))) tt.style.display='none';
+  });
+
+  /* ═══════════════════════════════════════════════════════════════
+     γ-6 (SES-443続走): 軍師チュートリアル＋用語の帳＋マイクロアニメ
+     方式: render()ラップ＋captureリスナー注入（既存ハンドラ無改修）
+     語り手=世界観内「軍師」(user裁定 2026-06-07・HC2人は裏方)
+     ═══════════════════════════════════════════════════════════════ */
+  var GLOSSARY=[
+    ['起動 (Act)','起きている札の[Act]の力を使う。1ターンに1区画だけ・札ごとに1回まで。'],
+    ['兵站','軍事札の維持費。ターン開始時に🌾で払う。払えぬ札は眠りに落ちる。'],
+    ['警備','眠っていても効く守りの数字。城壁・堀の本領。'],
+    ['眠り (Sleep)','働けない状態。精算のたび、眠った札は捨て札の国へ降りる(循環)。'],
+    ['押し出し','区画の枠(英雄1・他は3)を超えて置くと、最も古い札が眠りに落ちる。'],
+    ['Burst','精算の最後、上限を超えた資源はこぼれ落ちる。🌾⚒📜の基礎上限は5。'],
+    ['Scale','英雄は⭐人気の高さ(3-5／6-8／9+)で姿と力を変える。'],
+    ['堅固','破壊・追放に巻き込まれない。ただし政治の手(粛清)だけは防げぬ。'],
+    ['消耗','一度眠るとゲームから追放される、使い切りの札。'],
+    ['重装','受け手に回ったとき、守りに上乗せされる鎧。']
+  ];
+  var TUT={ on:false, ix:0 };
+  function boardCount(pi){ var n=0; SEC.forEach(function(s){ n+=st.players[pi].board[s].length; }); return n; }
+  function anyActed(pi){ var f=false; SEC.forEach(function(s){ st.players[pi].board[s].forEach(function(c){ if(c.actionUsed) f=true; }); }); return f; }
+  function anyPlayable(){ try{ return ECG.listPlayable(st).some(function(x){return x.canPlay;}); }catch(e){ return false; } }
+  function anyActs(){ try{ var f=false; SEC.forEach(function(s){ if(st.actionSection===null||st.actionSection===s){ if(ECG.listActs(st,s).length) f=true; } }); return f; }catch(e){ return false; } }
+  function tutSteps(){
+    return [
+   { t:'ようこそ、若き王よ。わしは先代より仕える軍師——手ほどきを任されておる。まずは其方のターンを始めよう。',
+     h:'右の「▶ P1 ターン開始」を押す', spot:'[data-act="startTurn"]',
+     allow:function(a){ return a.act==='startTurn'; },
+     done:function(){ return st.phase!=='waiting'; } },
+   { t:'これが其方の手札、帝国の種だ。札に手を翳せば(ホバー)わしの注釈が出る。では一枚——金色に光る札を置いてみよ。',
+     h:'光っている手札をクリックして配置', spot:'.hand-row .card.actable',
+     allow:function(a){ return !!a.card; },
+     done:function(){ return boardCount(0)>=1; } },
+   { t:'うむ。場は5つの区画——🌾農業・⚙工業・⚔軍事・🏛政治・👑英雄。札は己の区画でしか働かぬ。もう一枚置こう。',
+     h:'続けてもう1枚配置', spot:'.hand-row .card.actable',
+     allow:function(a){ return !!a.card; },
+     done:function(){ return boardCount(0)>=2; },
+     esc:function(){ return !anyPlayable(); } },
+   { t:'置いた札は「起きて」おる。<b>起きている札だけが、働く</b>——この国のただひとつの理だ。試しに札を起動(Act)してみよ。起動は1ターンに1区画だけ。',
+     h:'場の光る札をクリック → 起動', spot:'.board:not(.opp) .card.actable',
+     allow:function(a){ return !!a.card||a.act==='execAct'||a.act==='closeActMenu'||a.act==='boostInc'||a.act==='boostDec'; },
+     done:function(){ return anyActed(0); },
+     esc:function(){ return !anyActs(); } },
+   { t:'よろしい。働かせたら、締める。メインを終えて<b>精算</b>へ——起きた札が産み、軍がぶつかり、眠った札は捨て札の国へ降りる。',
+     h:'「⏭ メイン終了 → 精算」を押す', spot:'[data-act="endMain"]',
+     allow:function(a){ return a.act==='endMain'; },
+     done:function(){ return st.phase==='buy'||st.phase==='waiting'; } },
+   { t:'ここは<b>獲得</b>の間。自分専用のサプライから毎ターン一枚、無料で迎えられる。帝国は一枚ずつしか育たぬ——だからこそ、選べ。',
+     h:'表の札を「獲得」(🎲ブラインドでも可)', spot:'.supply',
+     allow:function(a){ return a.act==='acq'||a.act==='acqBlind'; },
+     done:function(){ return st.supplies&&st.supplies[0].acquiredThisTurn; },
+     esc:function(){ return st.phase!=='buy'; } },
+   { t:'迎えた札は捨て札に入り、山が尽きたとき混ざって戻ってくる。<b>循環</b>だ。ではターンを敵帝へ返そう。',
+     h:'「⏭ ターン終了」を押す', spot:'[data-act="endTurn"]',
+     allow:function(a){ return a.act==='endTurn'; },
+     done:function(){ return st.current===1; } },
+   { t:'敵帝も同じ理で国を回す。手の内を、見ておくがよい。',
+     h:'CPUのターンを見守る', spot:null,
+     allow:function(){ return false; },
+     done:function(){ return st.current===0&&st.phase==='waiting'; } },
+   { t:'2ターン目だ。上の帯の資源を見よ——🌾糧食・⚒物資・📜文明・⭐人気。精算で<b>上限を超えた分はこぼれ落ちる</b>(Burst)。蓄えるな、使い切れ。',
+     h:'「▶ ターン開始」', spot:'[data-act="startTurn"]',
+     allow:function(a){ return a.act==='startTurn'; },
+     done:function(){ return st.phase!=='waiting'&&st.turn>=2; } },
+   { t:'⚔軍事の札は維持に🌾を食う(<b>兵站</b>)。払えねば眠り、眠った札は「警備」の数字でしか守らぬ。このターンは好きに動いてみよ。',
+     h:'自由に配置・起動 →「⏭ メイン終了」', spot:null,
+     allow:function(){ return true; },
+     done:function(){ return st.phase==='buy'||st.phase==='waiting'; } },
+   { t:'戦の理はひとつ——其方の⚔ATKが敵の🛡DEFを超えた分だけ、敵の都市が削れる。<b>都市の❤️が尽きた帝国は、滅ぶ</b>。',
+     h:'獲得して「⏭ ターン終了」', spot:null,
+     allow:function(){ return true; },
+     done:function(){ return st.current===1; } },
+   { t:'最後にひとつ。区画には枠がある(英雄1・他は3)。あふれれば最も古い札から眠りに落ちる——<b>回りつづける帝国だけが、美しい</b>。ここからは其方の治世だ。困ったら📖用語の帳と、わしの注釈(ホバー)を頼るがよい。',
+     h:'下の「軍師に礼を言う」で手ほどき完了', spot:null,
+     allow:function(){ return true; },
+     done:function(){ return false; } }
+    ];
+  }
+  function startTutorial(){
+    ui.factions=['Knight','Viking']; ui.mode='cpu'; ui.deckSel=[-1,-1];
+    st=ECG.newGame({factions:['Knight','Viking'],mode:'cpu',decks:[null,null]});
+    TUT.on=true; TUT.ix=0;
+    ui.screen='game'; ui.pending=null; ui.actMenu=null; ui._snap=null;
+    save(); render();
+  }
+  function endTutorial(thanks){
+    TUT.on=false;
+    var g=document.getElementById('tutGuide'); if(g) g.remove();
+    clearSpots();
+    if(thanks) showBanner('──良い治世を、王よ');
+    render();
+  }
+  function clearSpots(){
+    var olds=document.querySelectorAll('.tut-spot');
+    for(var i=0;i<olds.length;i++) olds[i].classList.remove('tut-spot');
+  }
+  function injectGuide(s,total){
+    var old=document.getElementById('tutGuide'); if(old) old.remove();
+    clearSpots();
+    if(s.spot){
+      var els=app.querySelectorAll(s.spot);
+      for(var i=0;i<els.length;i++) els[i].classList.add('tut-spot');
+    }
+    var last=TUT.ix===total-1;
+    var d=document.createElement('div');
+    d.id='tutGuide'; d.className='tut-guide';
+    d.innerHTML='<div class="tut-who">軍 師 の 帳</div>'+
+      '<div class="tut-text">'+s.t+'</div>'+
+      '<div class="tut-hint">▷ '+esc(s.h)+'</div>'+
+      '<div class="tut-foot">'+
+      (last?'<button class="mini-btn go" data-act="tutDone">🙏 軍師に礼を言う（完了）</button>':'')+
+      '<button class="mini-btn" data-act="tutSkip">✕ 軍師を下がらせる</button>'+
+      '<span class="tut-step">'+(TUT.ix+1)+' / '+total+'</span></div>';
+    document.body.appendChild(d);
+  }
+  function tutNudge(){
+    var g=document.getElementById('tutGuide');
+    if(!g) return;
+    g.classList.remove('nudge'); void g.offsetWidth; g.classList.add('nudge');
+  }
+  function tutPass(){
+    if(!st||ui.screen!=='game'){ if(TUT.on) endTutorial(false); return; }
+    var steps=tutSteps(), guard=0;
+    while(TUT.ix<steps.length&&guard++<20){
+      var s=steps[TUT.ix];
+      var fin=false;
+      try{ fin=(s.done&&s.done())||(s.esc&&s.esc()); }catch(e){}
+      if(fin) TUT.ix++; else break;
+    }
+    if(TUT.ix>=steps.length){ endTutorial(true); return; }
+    injectGuide(steps[TUT.ix],steps.length);
+  }
+  // ── 用語の帳 ──
+  function injectGloss(){
+    var h='<div class="overlay" id="glossOv"><div class="modal" style="max-width:480px">'+
+      '<h3>📖 用語の帳 — 軍師の注釈</h3><dl class="gloss-list">';
+    GLOSSARY.forEach(function(g){ h+='<dt>'+esc(g[0])+'</dt><dd>'+esc(g[1])+'</dd>'; });
+    h+='</dl><button class="big-btn ghost" data-act="glossClose" style="width:auto;padding:9px 22px">閉じる</button></div></div>';
+    var d=document.createElement('div'); d.innerHTML=h;
+    document.body.appendChild(d.firstChild);
+  }
+  // ── マイクロアニメ (リデ: 気持ちよくないと、意味ないじゃん) ──
+  function snapOf(){
+    if(!st) return null;
+    var s={turn:st.turn,uids:{},res:[],hp:[]};
+    for(var pi=0;pi<2;pi++){
+      var p=st.players[pi];
+      s.res.push({f:p.resources.food,p:p.resources.prod,c:p.resources.civ,h:p.resources.fame});
+      s.hp.push(p.cityHP);
+      SEC.forEach(function(sec){ p.board[sec].forEach(function(c){ s.uids[c.uid]=1; }); });
+    }
+    return s;
+  }
+  function showBanner(text){
+    var old=document.querySelector('.turn-banner'); if(old) old.remove();
+    var d=document.createElement('div');
+    d.className='turn-banner'; d.textContent=text;
+    document.body.appendChild(d);
+    setTimeout(function(){ d.remove(); },1350);
+  }
+  function animPass(snap){
+    if(!st||ui.screen!=='game') return;
+    if(snap){
+      var cards=app.querySelectorAll('.board .card[data-uid]');
+      for(var i=0;i<cards.length;i++){
+        if(!snap.uids[cards[i].getAttribute('data-uid')]) cards[i].classList.add('anim-place');
+      }
+      var meIdx=st.mode==='cpu'?0:st.current;
+      for(var pi=0;pi<2;pi++){
+        if(st.players[pi].cityHP<snap.hp[pi]){
+          var bar=document.querySelector(pi===meIdx?'.resbar.mine':'.resbar:not(.mine)');
+          if(bar){ bar.classList.add('anim-hit'); }
+        }
+      }
+      var cur=st.players[meIdx].resources, prev=snap.res[meIdx];
+      if(cur.food>prev.f||cur.prod>prev.p||cur.civ>prev.c||cur.fame>prev.h){
+        var mb=document.querySelector('.resbar.mine'); if(mb) mb.classList.add('res-up');
+      }
+      if(st.turn>snap.turn) showBanner('── ターン '+st.turn+' ──');
+    }else if(st.turn===1&&st.phase==='waiting'){
+      showBanner('── 開 戦 ──');
+    }
+  }
+  // ── render ラップ ──
+  var _renderCore=render;
+  render=function(){
+    var snap=ui._snap||null;
+    _renderCore();
+    try{ animPass(snap); }catch(e){}
+    ui._snap=snapOf();
+    if(ui.gloss){ var ov=document.getElementById('glossOv'); if(!ov) injectGloss(); }
+    if(TUT.on) tutPass();
+  };
+  // ── captureリスナー: γ-6アクション処理＋チュートリアルgate（既存ハンドラ無改修） ──
+  var TUT_FREE={tutStart:1,tutSkip:1,tutDone:1,glossary:1,glossClose:1,newGame:1,toTitle:1,cancelPending:1,closeActMenu:1};
+  app.addEventListener('click',function(ev){
+    var btn=ev.target.closest('[data-act]');
+    var act=btn?btn.getAttribute('data-act'):null;
+    if(act==='tutStart'){ ev.stopImmediatePropagation(); ev.preventDefault(); startTutorial(); return; }
+    if(act==='tutSkip'||act==='tutDone'){ ev.stopImmediatePropagation(); ev.preventDefault(); endTutorial(act==='tutDone'); return; }
+    if(act==='glossary'){ ev.stopImmediatePropagation(); ev.preventDefault(); ui.gloss=true; injectGloss(); return; }
+    if(act==='glossClose'){ ev.stopImmediatePropagation(); ev.preventDefault(); ui.gloss=false; var ov=document.getElementById('glossOv'); if(ov) ov.remove(); return; }
+    if(!TUT.on) return;
+    if(act&&TUT_FREE[act]) return;
+    var step=tutSteps()[TUT.ix];
+    if(!step) return;
+    var cardEl=ev.target.closest('.card');
+    if(!btn&&!cardEl) return;
+    var info={act:act,card:!!cardEl,zone:cardEl?cardEl.getAttribute('data-zone'):null};
+    var ok=false;
+    try{ ok=step.allow(info); }catch(e){ ok=true; }
+    if(!ok){ ev.stopImmediatePropagation(); ev.preventDefault(); tutNudge(); }
+  },true);
+  document.body.addEventListener('click',function(ev){
+    var b=ev.target.closest('[data-act]');
+    if(!b) return;
+    var a=b.getAttribute('data-act');
+    if(a==='tutSkip'||a==='tutDone'){ endTutorial(a==='tutDone'); }
+    if(a==='glossClose'){ ui.gloss=false; var ov=document.getElementById('glossOv'); if(ov) ov.remove(); }
   });
 
   boot();
