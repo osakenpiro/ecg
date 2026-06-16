@@ -39,6 +39,7 @@ select{font-family:inherit;}
 .title-screen h1{font-family:var(--serif); font-weight:400; font-size:35px; color:var(--gold); letter-spacing:.08em;
   text-shadow:0 0 30px var(--gold-glow); line-height:1.15; text-align:center;}
 .title-screen .sub{color:var(--fg-3); font-size:12px; letter-spacing:.14em;}
+.title-screen .loop{max-width:540px; text-align:center; color:var(--parchment); font-size:13.5px; line-height:1.7; letter-spacing:.04em; margin:-2px 0 2px;}
 .myth{max-width:540px; text-align:center; padding:13px 20px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); margin:2px 0 4px;}
 .myth-q{font-family:var(--serif); font-size:15px; color:var(--fg-1); line-height:1.85;}
 .myth-s{font-size:11px; color:var(--fg-3); margin-top:6px; line-height:1.7;}
@@ -3652,6 +3653,7 @@ if(typeof module!=='undefined'&&module.exports) module.exports=ECG_AI;
     var h='<div class="title-screen">';
     h+='<div class="title-cap">EMPIRE CARD GAME — ECG v2.20</div>';
     h+='<h1>帝国運用カードゲーム</h1>';
+    h+='<p class="loop">毎ターン〈一区画だけ起こして〉攻め・守り・兵站を回し、勢力を奪って相手の帝国を削りきる。</p>';
     h+='<p class="sub">マナなし4資源 ／ 74カード ／ 起きている札だけが、働く</p>';
     h+='<div class="myth"><div class="myth-q">'+esc(my.q)+'</div><div class="myth-s">'+esc(my.s)+'</div><div class="myth-src">神話残篇 '+my.id+'『'+my.t+'』</div></div>';
     [0,1].forEach(function(pi){
